@@ -1,0 +1,30 @@
+## Roles routes
+
+### Create role
+POST localhost:8080/api/v1/roles
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "admin"
+}
+
+### Get all roles
+GET localhost:8080/api/v1/roles
+Content-Type: application/json
+
+### Get role by id
+GET localhost:8080/api/v1/roles/1
+
+
+### update role
+PUT localhost:8080/api/v1/roles/1
+Content-Type: application/json
+
+{
+  "name": "ADMIN"
+}
+
+### Delete role
+DELETE localhost:8080/api/v1/roles/1
+Content-Type: application/json
