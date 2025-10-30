@@ -1,5 +1,11 @@
 package net.ayman.supplychainx.user.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.ayman.supplychainx.user.dto.UserRequestDTO;
 import net.ayman.supplychainx.user.dto.UserResponseDTO;
@@ -17,6 +23,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@Tag(name = "User management", description = "Operation related to user management")
 public class UserController {
 
     private final UserService userService;
@@ -38,9 +45,9 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody UserRequestDTO userDTO, BindingResult bindingResult) {
         System.out.println("user dto: " + userDTO);
-        if(bindingResult.hasErrors()) {
+        if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
-            for(FieldError error: bindingResult.getFieldErrors()) {
+            for (FieldError error : bindingResult.getFieldErrors()) {
                 errors.put(error.getField(), error.getDefaultMessage());
             }
             return ResponseEntity.badRequest().body(errors);
