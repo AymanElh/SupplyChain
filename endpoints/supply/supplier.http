@@ -1,7 +1,8 @@
 ## Supplier endpoints
+@baseurl = localhost:8080/api/v1/suppliers
 
 ### Get all suppliers
-GET localhost:8080/api/v1/suppliers?page=0&size=1
+GET {{baseurl}}?page=0&size=1
 Content-Type: application/json
 
 
@@ -18,9 +19,9 @@ POST localhost:8080/api/v1/suppliers
 Content-Type: application/json
 
 {
-  "name": "New Supplier",
+  "name": "Ayman",
   "phone": "1234567890",
-  "email": "supplier1@example.com",
+  "email": "ayman@example.com",
   "rating": 4.5,
   "leadTime": 10
 }
