@@ -27,7 +27,9 @@ public class SupplierOrderItem {
     @Column(nullable = false)
     private Integer quantity;
     @Column
-    private double unitPrice;
+    private Double unitPrice;
+    @Column(name = "sub_total")
+    private Double subTotal;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -41,5 +43,11 @@ public class SupplierOrderItem {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void calculateSubTotal() {
+        if (quantity != null && unitPrice != null) {
+            this.subTotal = this.quantity * this.unitPrice;
+        }
     }
 }

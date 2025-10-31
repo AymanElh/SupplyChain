@@ -23,7 +23,8 @@ public class SupplierOrder {
     @Column
     private Double amount;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OrderStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,6 +36,11 @@ public class SupplierOrder {
             cascade = CascadeType.ALL
     )
     private List<SupplierOrderItem> items;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -50,5 +56,14 @@ public class SupplierOrder {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public boolean canBeDeleted() {
+        return this.status != OrderStatus.RECEIVED;
     }
 }

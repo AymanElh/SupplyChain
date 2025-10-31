@@ -4,6 +4,7 @@ import net.ayman.supplychainx.supply.dto.supplier.SupplierRequestDTO;
 import net.ayman.supplychainx.supply.dto.supplier.SupplierResponseDTO;
 import net.ayman.supplychainx.supply.model.Supplier;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 

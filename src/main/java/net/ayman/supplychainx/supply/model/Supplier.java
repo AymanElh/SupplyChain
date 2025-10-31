@@ -62,4 +62,14 @@ public class Supplier {
     private void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public boolean hasActiveOrders() {
+        if (orders == null || orders.isEmpty()) {
+            return false;
+        }
+
+        return orders
+                .stream()
+                .anyMatch(order -> order.getStatus() != OrderStatus.RECEIVED);
+    }
 }

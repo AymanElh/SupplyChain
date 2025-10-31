@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "raw_materials")
+@SQLDelete(sql = "UPDATE raw_materials SET is_deleted = true, deleted_at = NOW()")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,6 +39,10 @@ public class RawMaterial {
     @OneToMany(mappedBy = "rawMaterial")
     private List<SupplierOrderItem> orderItems;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -51,5 +57,21 @@ public class RawMaterial {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateStock(Integer quantity) {
+        this.stock += quantity;
+        if (this.stock < 0) {
+            this.stock = 0;
+        }
+    }
+
+    public boolean isMaterialInOrdering() {
+        return orderItems != null && !orderItems.isEmpty();
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }
