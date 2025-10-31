@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "supplier_orders")
+@SQLDelete(sql = "UPDATE supplier_orders SET is_deleted = true, deleted_at = NOW()")
+@SQLRestriction("is_deleted = false")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,7 +29,7 @@ public class SupplierOrder {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.WAITING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id", nullable = false)
@@ -65,5 +69,13 @@ public class SupplierOrder {
 
     public boolean canBeDeleted() {
         return this.status != OrderStatus.RECEIVED;
+    }
+
+    public void markReceived() {
+        if(this.status == OrderStatus.RECEIVED) {
+            throw new IllegalStateException("Order is already received");
+        }
+
+        this.status = OrderStatus.RECEIVED;
     }
 }
