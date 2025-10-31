@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class RawMaterialRequest {
     @NotBlank(message = "Name is required")
@@ -18,5 +20,5 @@ public class RawMaterialRequest {
     @NotBlank(message = "Unit is required")
     private String unit;
     @NotNull
-    private Long supplierId;
+    private List<Long> supplierIds;
 }

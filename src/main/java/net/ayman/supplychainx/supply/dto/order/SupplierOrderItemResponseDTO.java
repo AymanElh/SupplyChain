@@ -11,8 +11,7 @@ public class SupplierOrderItemResponseDTO {
     private Long id;
     private Long materialId;
     private String materialName;
-    private String materialUnit;
     private Integer quantity;
     private Double unitPrice;
-    private Double subtotal;
+    private Double subTotal;
 }
