@@ -1,0 +1,33 @@
+# Products endpoints tests
+
+@host = localhost:8080/api/v1
+
+### Create new product
+POST {{host}}/products
+Content-Type: application/json
+
+{
+  "name": "Mouse",
+  "productionTime": 24,
+  "cost": 500,
+  "stock": 5
+}
+
+### Get all products
+GET {{host}}/products
+
+
+### Update product
+PUT {{host}}/products/4
+Content-Type: application/json
+
+{
+  "name": "Updated product"
+}
+
+### GET product by id
+GET {{host}}/products/4
+
+
+### Delete product
+DELETE {{host}}/products/4
