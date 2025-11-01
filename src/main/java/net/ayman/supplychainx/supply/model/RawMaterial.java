@@ -39,6 +39,9 @@ public class RawMaterial {
     @OneToMany(mappedBy = "rawMaterial")
     private List<SupplierOrderItem> orderItems;
 
+    @Column(name = "unit_cost")
+    private Double unitCost;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
     @Column(name = "deleted_at")

@@ -1,5 +1,6 @@
 package net.ayman.supplychainx.supply.service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
 import net.ayman.supplychainx.supply.exception.MaterialAlreadyExistsException;
 import net.ayman.supplychainx.supply.exception.MaterialInUseException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 
+@Slf4j
 @Service
 public class RawMaterialServiceImp implements RawMaterialService {
 
@@ -41,6 +43,7 @@ public class RawMaterialServiceImp implements RawMaterialService {
                 .map(id -> supplierRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Supplier with this id " + id + " not found")))
                 .toList();
         RawMaterial material = rawMaterialMapper.toEntity(materialDto);
+        log.info("creating new material: {}", material);
         material.setSuppliers(suppliers);
         return rawMaterialMapper.toResponseDTO(rawMaterialRepository.save(material));
     }

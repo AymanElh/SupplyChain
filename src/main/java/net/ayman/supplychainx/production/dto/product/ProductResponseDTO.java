@@ -14,4 +14,5 @@ public class ProductResponseDTO {
     private Double cost;
     private Double materialCost; // I will handle it after
     private Double profitMargin; // I will handle it after
+    private Boolean hasBom;
 }

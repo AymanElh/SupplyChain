@@ -32,7 +32,7 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<BillOfMaterial> bills = new ArrayList<>();
     @OneToMany(mappedBy = "product")
-    private List<ProductionOrder> orders = new ArrayList<>();
+    private List<ProductionOrder> productionOrders = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -62,6 +62,29 @@ public class Product {
     }
 
     public boolean canBeDeleted() {
-        return orders == null || orders.isEmpty();
+        return productionOrders == null || productionOrders.isEmpty();
+    }
+
+    public Double calculateMaterialCost() {
+        if (bills == null || bills.isEmpty()) {
+            return 0.0;
+        }
+
+        return bills.stream()
+                .mapToDouble(bill -> {
+                    if(bill.getMaterial() != null || bill.getMaterial().getUnitCost() != null) {
+                        return bill.getQuantity() * bill.getMaterial().getUnitCost();
+                    }
+                    return 0.0;
+                })
+                .sum();
+    }
+
+    public Double calculateProfitMargin() {
+        return cost - calculateMaterialCost();
+    }
+
+    public boolean hasBom() {
+        return bills != null && !bills.isEmpty();
     }
 }

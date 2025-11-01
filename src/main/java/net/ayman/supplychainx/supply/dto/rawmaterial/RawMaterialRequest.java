@@ -17,6 +17,9 @@ public class RawMaterialRequest {
     @NotNull
     @Positive(message = "Stock min must be greater than 0")
     private Integer stockMin;
+    @NotNull
+    @Positive
+    private Double unitCost;
     @NotBlank(message = "Unit is required")
     private String unit;
     @NotNull

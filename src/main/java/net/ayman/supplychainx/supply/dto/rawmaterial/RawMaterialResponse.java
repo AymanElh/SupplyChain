@@ -13,5 +13,6 @@ public class RawMaterialResponse {
     private Integer stock;
     private Integer stockMin;
     private String unit;
+    private Double unitCost;
     private Boolean isCritical;
 }

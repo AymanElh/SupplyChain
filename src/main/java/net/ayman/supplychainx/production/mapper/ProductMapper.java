@@ -10,7 +10,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "billOfMaterials", ignore = true)
+    @Mapping(target = "bills", ignore = true)
     @Mapping(target = "productionOrders", ignore = true)
     @Mapping(target = "isDeleted", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -19,10 +19,13 @@ public interface ProductMapper {
     Product toEntity(ProductRequestDTO productRequest);
 
     // TODO: I will add the expressions of response dto that I get from entity methods
+    @Mapping(target = "materialCost", expression = "java(product.calculateMaterialCost())")
+    @Mapping(target = "profitMargin", expression = "java(product.calculateProfitMargin())")
+    @Mapping(target = "hasBom", expression = "java(product.hasBom())")
     ProductResponseDTO toResponseDTO(Product product);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "billOfMaterials", ignore = true)
+    @Mapping(target = "bills", ignore = true)
     @Mapping(target = "productionOrders", ignore = true)
     @Mapping(target = "isDeleted", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

@@ -7,7 +7,7 @@ POST {{host}}/products
 Content-Type: application/json
 
 {
-  "name": "Mouse",
+  "name": "Screen",
   "productionTime": 24,
   "cost": 500,
   "stock": 5
