@@ -26,8 +26,32 @@ Content-Type: application/json
 }
 
 ### GET product by id
-GET {{host}}/products/4
+GET {{host}}/products/3
 
 
 ### Delete product
 DELETE {{host}}/products/4
+
+
+## Bill of material endpoints
+
+### Add material to endpoint
+POST {{host}}/products/3/bills
+Content-Type: application/json
+
+{
+  "materialId": 1,
+  "quantity": 5
+}
+
+###
+POST {{host}}/products/3/bills
+Content-Type: application/json
+
+{
+"materialId": 4,
+"quantity": 2
+}
+
+### Get bills of a product
+GET {{host}}/products/3/bills

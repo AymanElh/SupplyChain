@@ -72,7 +72,7 @@ public class Product {
 
         return bills.stream()
                 .mapToDouble(bill -> {
-                    if(bill.getMaterial() != null || bill.getMaterial().getUnitCost() != null) {
+                    if(bill.getMaterial() != null && bill.getMaterial().getUnitCost() != null) {
                         return bill.getQuantity() * bill.getMaterial().getUnitCost();
                     }
                     return 0.0;
