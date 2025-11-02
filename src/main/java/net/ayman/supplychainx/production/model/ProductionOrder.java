@@ -66,6 +66,15 @@ public class ProductionOrder {
         return this.status == ProductionStatus.IN_WAITING;
     }
 
+    public boolean canBeCompleted() {
+        return this.status == ProductionStatus.IN_PRODUCTION;
+    }
+
+    public void completeOrder() {
+        this.status = ProductionStatus.FINISHED;
+        this.endDate = LocalDate.now();
+    }
+
     public void startProduction() {
         status = ProductionStatus.IN_PRODUCTION;
         startDate = LocalDate.now();

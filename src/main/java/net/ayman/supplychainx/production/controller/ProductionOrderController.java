@@ -69,6 +69,11 @@ public class ProductionOrderController {
         return ResponseEntity.ok(productionOrderService.startProduction(id));
     }
 
+    @PostMapping("/{id}/complete-production")
+    public ResponseEntity<ProductionOrderResponseDTO> completeProd(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(productionOrderService.completeProduction(id));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelOrder(@PathVariable("id") Long id) {
         productionOrderService.cancelOrder(id);

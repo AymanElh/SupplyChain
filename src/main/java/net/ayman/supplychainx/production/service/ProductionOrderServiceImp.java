@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Slf4j
 @Service
@@ -84,6 +83,22 @@ public class ProductionOrderServiceImp implements ProductionOrderService {
         order.startProduction();
         ProductionOrder updatedOrder = productionOrderRepository.save(order);
         return productionOrderMapper.toResponseDTO(updatedOrder);
+    }
+
+    @Override
+    public ProductionOrderResponseDTO completeProduction(Long orderId) {
+        ProductionOrder order = productionOrderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (!order.canBeCompleted()) {
+            throw new BusinessRuleException("You can't complete order with this status " + order.getStatus());
+        }
+        order.completeOrder();
+        Product product = order.getProduct();
+        product.updateStock(order.getQuantity());
+        productRepository.save(product);
+        ProductionOrder updated = productionOrderRepository.save(order);
+        return productionOrderMapper.toResponseDTO(updated);
     }
 
     @Override
