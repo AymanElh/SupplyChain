@@ -1,0 +1,28 @@
+## Production order endpoints
+
+@host = localhost:8080/api/v1
+
+### Create a production order
+POST {{host}}/production-orders
+Content-Type: application/json
+
+{
+  "productId": 5,
+  "quantity": 12,
+  "priority": 5
+}
+
+### Get all orders
+GET {{host}}/production-orders
+
+### Start production
+POST {{host}}/production-orders/1/start-production
+
+### Complete production
+POST {{host}}/production-orders/1/complete-production
+
+### Get by status
+GET {{host}}/production-orders/status/IN_WAITING
+
+### Cancel order
+DELETE {{host}}/production-orders/3
