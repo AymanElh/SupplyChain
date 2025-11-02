@@ -1,0 +1,77 @@
+package net.ayman.supplychainx.production.controller;
+
+import jakarta.validation.Valid;
+import net.ayman.supplychainx.production.dto.order.ProductionOrderRequestDTO;
+import net.ayman.supplychainx.production.dto.order.ProductionOrderResponseDTO;
+import net.ayman.supplychainx.production.dto.order.UpdateProductionOrderStatusDTO;
+import net.ayman.supplychainx.production.model.ProductionOrder;
+import net.ayman.supplychainx.production.model.ProductionStatus;
+import net.ayman.supplychainx.production.service.ProductionOrderService;
+import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/production-orders")
+public class ProductionOrderController {
+
+    private final ProductionOrderService productionOrderService;
+
+    ProductionOrderController(ProductionOrderService productionOrderService) {
+        this.productionOrderService = productionOrderService;
+    }
+
+    @PostMapping
+    public ResponseEntity<ProductionOrderResponseDTO> createNewOrder(@Valid @RequestBody ProductionOrderRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(productionOrderService.createOrder(dto));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ProductionOrderResponseDTO>> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return ResponseEntity.ok(productionOrderService.getAll(pageable));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductionOrderResponseDTO> getOrderById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(productionOrderService.getById(id));
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<Page<ProductionOrderResponseDTO>> getByStatus(
+            @PathVariable("status") ProductionStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return ResponseEntity.ok(productionOrderService.getByStatus(pageable, status));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ProductionOrderResponseDTO> updateStatus(@PathVariable("id") Long orderId, @Valid @RequestBody UpdateProductionOrderStatusDTO dto) {
+        return ResponseEntity.ok(productionOrderService.updateStatus(orderId, dto.getStatus()));
+    }
+
+    @PostMapping("/{id}/start-production")
+    public ResponseEntity<ProductionOrderResponseDTO> startProd(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(productionOrderService.startProduction(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelOrder(@PathVariable("id") Long id) {
+        productionOrderService.cancelOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+}
