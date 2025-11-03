@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.ayman.supplychainx.supply.validation.OnCreate;
+import net.ayman.supplychainx.validation.OnCreate;
 
 @Data
 @NoArgsConstructor

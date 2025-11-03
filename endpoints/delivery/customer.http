@@ -1,0 +1,52 @@
+## Customer Delivery Endpoints
+
+@host = localhost:8080/api/v1/
+
+### Create New Customer
+POST {{host}}/delivery/customers
+Content-Type: application/json
+
+{
+  "name": "Ayman Elh",
+  "email": "ayman.elh@example.com",
+  "phone": "+1-415-555-0132",
+  "addresses": [
+    {
+      "street": "123 Market St",
+      "city": "San Francisco",
+      "region": "CA",
+      "postalCode": "94103",
+      "country": "USA"
+    }
+  ]
+}
+
+### Get Customer Details
+GET {{host}}/delivery/customers/7
+
+### Get All Customers
+GET {{host}}/delivery/customers
+
+### Update Customer Information
+PUT {{host}}/delivery/customers/7
+Content-Type: application/json
+
+{
+  "name": "updated name",
+  "email": "updated email"
+}
+
+### Delete Customer
+DELETE {{host}}/delivery/customers/5
+
+### Add address to Customer
+POST {{host}}/delivery/customers/7/addresses
+Content-Type: application/json
+
+{
+  "street": "456 Elm St",
+  "city": "Los Angeles",
+  "region": "CA",
+  "postalCode": "90001",
+  "country": "USA"
+}

@@ -163,7 +163,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
-                "An unexpected error occurred. Please contact support.",
+                ex.getMessage(),
                 request.getRequestURI()
         );
 

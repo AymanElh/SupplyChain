@@ -25,10 +25,8 @@ public class Customer {
 
     private String email;
 
-    @OneToMany(mappedBy = "customer")
-    private List<Address> address;
-
-    private String city;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private List<Address> addresses;
 
     @OneToMany(mappedBy = "customer")
     private List<CustomerOrder> orders;
@@ -54,5 +52,10 @@ public class Customer {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void addAddressToCustomer(Address address) {
+        this.addresses.add(address);
+        address.setCustomer(this);
     }
 }

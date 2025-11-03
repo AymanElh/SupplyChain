@@ -20,9 +20,10 @@ public class CustomerOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer quantity;
+    private Integer quantity; // The total quantity of all order items of products (2 laptop, 2 mouse) total is 4
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20) default 'PENDING'")
     private OrderStatus status;
 
     @Column(name = "order_date")
@@ -64,5 +65,10 @@ public class CustomerOrder {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void startOrder() {
+        this.orderDate = LocalDate.now();
+        this.status = OrderStatus.IN_PREPARATION;
     }
 }
