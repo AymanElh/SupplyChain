@@ -43,4 +43,8 @@ public class CustomerOrderItem {
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void calculateSubTotal() {
+        this.subTotal = this.quantity * this.unitPrice;
+    }
 }

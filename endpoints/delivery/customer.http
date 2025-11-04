@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ### Delete Customer
-DELETE {{host}}/delivery/customers/5
+DELETE {{host}}/delivery/customers/11
 
 ### Add address to Customer
 POST {{host}}/delivery/customers/7/addresses
@@ -48,5 +48,5 @@ Content-Type: application/json
   "city": "Los Angeles",
   "region": "CA",
   "postalCode": "90001",
-  "country": "USA"
+  "country": "Morocoo"
 }

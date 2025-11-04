@@ -1,0 +1,40 @@
+## Customer order entpoints
+
+@host = localhost:8080/api/v1/customer-orders
+
+### Create new order
+POST {{host}}/
+Content-Type: application/json
+
+{
+  "customerId": 7,
+  "quantity": 20,
+  "addressId": 1,
+  "orderItems": [
+    {
+      "quantity": 5,
+      "productId": 7,
+      "unitPrice": 500
+    }
+  ]
+}
+
+### Update order status
+PATCH {{host}}/7/status
+Content-Type: application/json
+
+{
+  "status": "IN_PREPARATION"
+}
+
+### Get by Customer
+GET {{host}}/customer/7
+
+### Get all orders
+GET {{host}}/
+
+### Get order by id
+GET {{host}}/7
+
+### Delete order
+DELETE {{host}}/7

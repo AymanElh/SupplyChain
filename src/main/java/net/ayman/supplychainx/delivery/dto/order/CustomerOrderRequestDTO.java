@@ -2,14 +2,15 @@ package net.ayman.supplychainx.delivery.dto.order;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import net.ayman.supplychainx.delivery.dto.OrderItem.OrderItemRequestDTO;
+import net.ayman.supplychainx.delivery.dto.OrderItem.CustomerOrderItemRequestDTO;
+import net.ayman.supplychainx.delivery.dto.OrderItem.CustomerOrderItemResponseDTO;
+import net.ayman.supplychainx.validation.OnCreate;
 
 import java.util.List;
 
 public record CustomerOrderRequestDTO(
-        @NotNull Long customerId,
-        @NotNull @Min(value = 1) Integer quantity,
-        @NotNull Integer addressId,
-        @NotNull List<OrderItemRequestDTO> orders
+        @NotNull(groups = OnCreate.class) Long customerId,
+        @NotNull Long addressId,
+        @NotNull List<CustomerOrderItemRequestDTO> orderItems
 ) {
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "customers")
-@SQLDelete(sql = "UPDATE customers SET is_deleted = true, deleted_at = NOW()")
+@SQLDelete(sql = "UPDATE customers SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 @Data
 public class Customer {

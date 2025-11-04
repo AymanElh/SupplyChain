@@ -5,5 +5,6 @@ public record AddressResponseDTO (
         String postalCode,
         String region,
         String city,
-        String street
+        String street,
+        String country
 ) {}
