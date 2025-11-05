@@ -1,0 +1,37 @@
+## Vehicle endpoints
+
+@host = localhost:8080/api/v1
+
+### Get all vehicles
+GET {{host}}/vehicles
+
+### Get a vehicle by ID
+GET {{host}}/vehicles/{vehicleId}
+
+
+### Create a new vehicle
+POST {{host}}/vehicles
+Content-Type: application/json
+
+{
+  "make": "Toyota",
+  "model": "Corolla",
+  "year": 2020,
+  "licensePlate": "ABC123"
+}
+
+
+### Update a vehicle by ID
+PUT {{host}}/vehicles/{vehicleId}
+Content-Type: application/json
+
+{
+  "make": "updatedMake",
+  "model": "Camry",
+  "year": 2021,
+  "licensePlate": "XYZ789"
+}
+
+### Delete a vehicle by ID
+DELETE {{host}}/vehicles/{vehicleId}
+

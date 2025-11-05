@@ -1,12 +1,14 @@
 package net.ayman.supplychainx.delivery.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import javax.annotation.processing.Generated;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "drivers")
+@Data
 public class Driver {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +19,7 @@ public class Driver {
     @Column(name = "license_number")
     private String licenseNumber;
     @Column(name = "is_available")
-    private Boolean isAvailable;
+    private Boolean isAvailable = true;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
