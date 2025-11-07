@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "deliveries")
-@SQLDelete(sql = "UPDATE deliveries SET is_deleted = true, deleted_at = NOW()")
+@SQLDelete(sql = "UPDATE deliveries SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 @Data
 public class Delivery {
@@ -57,5 +57,21 @@ public class Delivery {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean canBeDelivered() {
+        return this.status == DeliveryStatus.DELIVERED;
+    }
+
+    public void startDelivery() {
+        this.status = DeliveryStatus.IN_PROGRESS;
+    }
+
+    public boolean canBeUpdateQuantity() {
+        return this.status == DeliveryStatus.SCHEDULED;
+    }
+
+    public boolean canBeDeleted() {
+
     }
 }

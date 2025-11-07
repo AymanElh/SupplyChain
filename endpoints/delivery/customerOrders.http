@@ -12,15 +12,15 @@ Content-Type: application/json
   "addressId": 1,
   "orderItems": [
     {
-      "quantity": 5,
-      "productId": 7,
-      "unitPrice": 500
+      "quantity": 15,
+      "productId": 3,
+      "unitPrice": 400.0
     }
   ]
 }
 
 ### Update order status
-PATCH {{host}}/7/status
+PATCH {{host}}/8/status
 Content-Type: application/json
 
 {

@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import net.ayman.supplychainx.delivery.dto.driver.DriverRequestDTO;
 import net.ayman.supplychainx.delivery.dto.driver.DriverResponseDTO;
 import net.ayman.supplychainx.delivery.service.DriverService;
+import net.ayman.supplychainx.validation.OnCreate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,7 +33,7 @@ public class DriverController {
     }
 
     @PostMapping
-    public ResponseEntity<DriverResponseDTO> addNewDriver(DriverRequestDTO driverRequestDTO) {
+    public ResponseEntity<DriverResponseDTO> addNewDriver(@Validated(OnCreate.class) @RequestBody DriverRequestDTO driverRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(driverService.addNewDriver(driverRequestDTO));
     }
 

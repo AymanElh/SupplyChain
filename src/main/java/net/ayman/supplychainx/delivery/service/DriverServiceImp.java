@@ -1,5 +1,6 @@
 package net.ayman.supplychainx.delivery.service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
 import net.ayman.supplychainx.delivery.dto.driver.DriverRequestDTO;
 import net.ayman.supplychainx.delivery.dto.driver.DriverResponseDTO;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class DriverServiceImp implements DriverService {
 
@@ -24,7 +26,10 @@ public class DriverServiceImp implements DriverService {
 
     @Override
     public DriverResponseDTO addNewDriver(DriverRequestDTO driverRequestDTO) {
-        return driverMapper.toResponseDTO(driverRepository.save(driverMapper.toEntity(driverRequestDTO)));
+        log.debug("Adding new driver: {}", driverRequestDTO);
+        Driver driver = driverMapper.toEntity(driverRequestDTO);
+        log.debug("Driver to be saved: {}", driver);
+        return driverMapper.toResponseDTO(driverRepository.save(driver));
     }
 
     @Override

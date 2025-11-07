@@ -1,7 +1,6 @@
 package net.ayman.supplychainx.user.controller;
 
 import jakarta.servlet.http.HttpSession;
-import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
 import net.ayman.supplychainx.user.model.Role;
 import net.ayman.supplychainx.user.service.RoleService;
 import org.springframework.http.HttpStatus;

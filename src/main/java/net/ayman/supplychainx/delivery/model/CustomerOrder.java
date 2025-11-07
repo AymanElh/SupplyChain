@@ -70,6 +70,10 @@ public class CustomerOrder {
         this.status = OrderStatus.IN_PREPARATION;
     }
 
+    public boolean canBeDelivered() {
+        return status == OrderStatus.READY;
+    }
+
     public void addOrderItem(CustomerOrderItem item) {
         items.add(item);
         item.setOrder(this);

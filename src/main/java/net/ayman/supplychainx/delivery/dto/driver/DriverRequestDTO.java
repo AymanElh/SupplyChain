@@ -8,6 +8,6 @@ public record DriverRequestDTO(
         @NotBlank(groups = OnCreate.class) String name,
         @NotBlank(groups = OnCreate.class) String phone,
         @NotBlank(groups = OnCreate.class) String licenseNumber,
-        @NotNull(groups = OnCreate.class) boolean isAvailable
+        boolean isAvailable
 ) {
 }

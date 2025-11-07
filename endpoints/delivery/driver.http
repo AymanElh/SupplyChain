@@ -15,7 +15,7 @@ Content-Type: application/json
 {
   "name": "John Doe",
   "licenseNumber": "D1234567",
-  "phoneNumber": "555-1234"
+  "phone": "555-1234"
 }
 
 ### Update a driver by ID

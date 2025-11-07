@@ -1,5 +1,6 @@
 package net.ayman.supplychainx.delivery.service;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import net.ayman.supplychainx.common.exception.BusinessRuleException;
 import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
@@ -39,6 +40,7 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
     }
 
     @Override
+    @Transactional
     public CustomerOrderResponseDTO createOrder(CustomerOrderRequestDTO dto) {
         log.debug("Creating new order: {}", dto);
         Customer customer = customerRepository.findById(dto.customerId())
@@ -61,7 +63,7 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
                     .orElseThrow(() -> new ResourceNotFoundException("Product with id " + item.productId() + " not found"));
 
             if (product.getStock() < item.quantity()) {
-                throw new BusinessRuleException("Product with id " + product.getName() + " has insufficient stock");
+                throw new BusinessRuleException("Product " + product.getName() + " has insufficient stock");
             }
         }
 
@@ -80,6 +82,8 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
             orderItem.setQuantity(item.quantity());
             orderItem.setUnitPrice(item.unitPrice());
             orderItem.calculateSubTotal();
+
+            product.setStock(product.getStock() - item.quantity());
 
             order.addOrderItem(orderItem);
         }
@@ -105,6 +109,7 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
     }
 
     @Override
+    @Transactional
     public CustomerOrderResponseDTO updateStatus(Long orderId, OrderStatus status) {
         log.debug("Updating status of order with id {} to {}", orderId, status);
         CustomerOrder order = customerOrderRepository.findById(orderId)
@@ -117,12 +122,23 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
     }
 
     @Override
+    @Transactional
     public void deleteOrder(Long id) {
         CustomerOrder order = customerOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order with id " + id + " not found"));
 
         if(order.getStatus() == OrderStatus.PENDING || order.getStatus() == OrderStatus.IN_WAY || order.getStatus() == OrderStatus.DELIVERED) {
             throw new BusinessRuleException("Cannot delete an order with status " + order.getStatus());
+        }
+
+
+
+        order.setStatus(OrderStatus.CANCELLED);
+
+        for (CustomerOrderItem item: order.getItems()) {
+            Product product = item.getProduct();
+            product.setStock(product.getStock() + item.getQuantity());
+            productRepository.save(product);
         }
 
         customerOrderRepository.delete(order);
