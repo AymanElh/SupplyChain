@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {RawMaterialMapper.class})
 public interface SupplierMapper {
     SupplierResponseDTO toResponseDTO(Supplier supplier);
     Supplier toEntity(SupplierRequestDTO dto);
