@@ -17,10 +17,10 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "name": "ayman",
+  "name": "aymam",
   "email": "ayman@gmail.com",
-  "password": "12345",
-  "phone": "29932929",
+  "password": "123456",
+  "phone": "+212600000001",
   "roleId": 1
 }
 
