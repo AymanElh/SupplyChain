@@ -1,9 +1,7 @@
 package net.ayman.supplychainx.supply.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -15,7 +13,7 @@ import java.util.List;
 @Table(name = "supplier_orders")
 @SQLDelete(sql = "UPDATE supplier_orders SET is_deleted = true, deleted_at = NOW()")
 @SQLRestriction("is_deleted = false")
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class SupplierOrder {

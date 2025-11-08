@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "supply_order_items")
-//@Data
-@Getter
-@Setter
+@Data
+//@Getter
+//@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class SupplierOrderItem {
@@ -20,7 +20,7 @@ public class SupplierOrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private SupplierOrder order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "material_id", nullable = false)
     private RawMaterial rawMaterial;
 

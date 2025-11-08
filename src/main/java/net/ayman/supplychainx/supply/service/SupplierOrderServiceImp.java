@@ -7,12 +7,14 @@ import net.ayman.supplychainx.supply.dto.order.SupplierOrderResponseDTO;
 import net.ayman.supplychainx.supply.mapper.SupplierOrderItemMapper;
 import net.ayman.supplychainx.supply.mapper.SupplierOrderMapper;
 import net.ayman.supplychainx.supply.model.*;
+import net.ayman.supplychainx.supply.repository.RawMaterialRepository;
 import net.ayman.supplychainx.supply.repository.SupplierOrderRepository;
 import net.ayman.supplychainx.supply.repository.SupplierRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -23,12 +25,14 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
     private final SupplierOrderRepository supplierOrderRepository;
     private final SupplierOrderItemMapper supplierOrderItemMapper;
     private final SupplierRepository supplierRepository;
+    private final RawMaterialRepository rawMaterialRepository;
 
-    public SupplierOrderServiceImp(SupplierOrderMapper supplierOrderMapper, SupplierOrderRepository supplierOrderRepository, SupplierOrderItemMapper supplierOrderItemMapper, SupplierRepository supplierRepository) {
+    public SupplierOrderServiceImp(SupplierOrderMapper supplierOrderMapper, SupplierOrderRepository supplierOrderRepository, SupplierOrderItemMapper supplierOrderItemMapper, SupplierRepository supplierRepository, RawMaterialRepository rawMaterialRepository) {
         this.supplierOrderMapper = supplierOrderMapper;
         this.supplierOrderRepository = supplierOrderRepository;
         this.supplierOrderItemMapper = supplierOrderItemMapper;
         this.supplierRepository = supplierRepository;
+        this.rawMaterialRepository = rawMaterialRepository;
     }
 
     @Override
@@ -48,20 +52,43 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
     @Override
     public SupplierOrderResponseDTO createOrder(SupplierOrderRequestDTO dto) {
         log.info("Creating supply order for supplier Id {}", dto.getSupplierId());
-        SupplierOrder order = supplierOrderMapper.toEntity(dto);
-
         Supplier supplier = supplierRepository.findById(dto.getSupplierId()).orElseThrow(() -> new ResourceNotFoundException("Supplier with this id " + dto.getSupplierId() + " not found"));
 
-        List<SupplierOrderItem> items = dto.getItems().stream()
-                .map(supplierOrderItemMapper::toEntity)
-                .toList();
+        SupplierOrder order = new SupplierOrder();
+        order.setSupplier(supplier);
+        order.setStatus(OrderStatus.WAITING);
+        order.setOrderDate(java.time.LocalDate.now());
 
-        for (SupplierOrderItem item: items) {
-            if(!supplier.getMaterials().contains(item.getRawMaterial())) {
-                throw new IllegalArgumentException("This material " + item.getRawMaterial().getName() + " not exist on that supplier");
+        List<SupplierOrderItem> items = new ArrayList<>();
+
+        for (var itemDto: dto.getItems()) {
+            RawMaterial material = rawMaterialRepository.findById(itemDto.getMaterialId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Material with id " + itemDto.getMaterialId() + " not found"
+                    ));
+
+            // ✅ Check if supplier provides this material
+            if (!supplier.getMaterials().contains(material)) {
+                log.warn("Material {} is not supplied by supplier {}",
+                        material.getName(), supplier.getName());
+                throw new IllegalArgumentException(
+                        "Material '" + material.getName() +
+                                "' is not available from supplier '" + supplier.getName() + "'"
+                );
             }
+
+            // Create order item
+            SupplierOrderItem item = new SupplierOrderItem();
+            item.setRawMaterial(material);
+            item.setQuantity(itemDto.getQuantity());
+            item.setUnitPrice(itemDto.getUnitPrice());
+            item.setOrder(order);
+            item.calculateSubTotal();
+
+            items.add(item);
         }
 
+        order.setItems(items);
         // check if the target supplier has the materials on the order
         System.out.println("Supplier in the order: " + order.getSupplier().getMaterials());
 
@@ -69,8 +96,6 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
             item.setOrder(order);
             item.calculateSubTotal();
         });
-
-        order.setItems(items);
 
 
         double totalAmount = items.stream()
