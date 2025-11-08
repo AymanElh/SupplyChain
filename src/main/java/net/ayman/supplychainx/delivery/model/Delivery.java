@@ -71,7 +71,13 @@ public class Delivery {
         return this.status == DeliveryStatus.SCHEDULED;
     }
 
+<<<<<<< HEAD
     public boolean canBeDeleted() {
 
     }
+=======
+    //    public boolean canBeDeleted() {
+    //
+    //    }
+>>>>>>> dev
 }
