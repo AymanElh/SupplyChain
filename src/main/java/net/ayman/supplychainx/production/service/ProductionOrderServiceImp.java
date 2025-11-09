@@ -6,14 +6,21 @@ import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
 import net.ayman.supplychainx.production.dto.order.ProductionOrderRequestDTO;
 import net.ayman.supplychainx.production.dto.order.ProductionOrderResponseDTO;
 import net.ayman.supplychainx.production.mapper.ProductionOrderMapper;
+import net.ayman.supplychainx.production.model.BillOfMaterial;
 import net.ayman.supplychainx.production.model.Product;
 import net.ayman.supplychainx.production.model.ProductionOrder;
 import net.ayman.supplychainx.production.model.ProductionStatus;
+import net.ayman.supplychainx.production.repository.BillOfMaterialRepository;
 import net.ayman.supplychainx.production.repository.ProductRepository;
 import net.ayman.supplychainx.production.repository.ProductionOrderRepository;
+import net.ayman.supplychainx.supply.model.RawMaterial;
+import net.ayman.supplychainx.supply.repository.RawMaterialRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
 
 
 @Slf4j
@@ -23,11 +30,15 @@ public class ProductionOrderServiceImp implements ProductionOrderService {
     private final ProductionOrderMapper productionOrderMapper;
     private final ProductionOrderRepository productionOrderRepository;
     private final ProductRepository productRepository;
+    private final BillOfMaterialRepository billOfMaterialRepository;
+    private final RawMaterialRepository rawMaterialRepository;
 
-    public ProductionOrderServiceImp(ProductionOrderMapper productionOrderMapper, ProductionOrderRepository productionOrderRepository, ProductRepository productRepository) {
+    public ProductionOrderServiceImp(ProductionOrderMapper productionOrderMapper, ProductionOrderRepository productionOrderRepository, ProductRepository productRepository, BillOfMaterialRepository billOfMaterialRepository, RawMaterialRepository rawMaterialRepository) {
         this.productionOrderMapper = productionOrderMapper;
         this.productionOrderRepository = productionOrderRepository;
         this.productRepository = productRepository;
+        this.billOfMaterialRepository = billOfMaterialRepository;
+        this.rawMaterialRepository = rawMaterialRepository;
     }
 
     @Override
@@ -80,7 +91,26 @@ public class ProductionOrderServiceImp implements ProductionOrderService {
             throw new BusinessRuleException("you can't start a order with status " + order.getStatus());
         }
 
+        Product product = order.getProduct();
+        List<BillOfMaterial> bills = billOfMaterialRepository.findByProductId(product.getId());
+
+        for (BillOfMaterial bom : bills) {
+            RawMaterial material = bom.getMaterial();
+            int requiredQuantity = bom.getQuantity() * order.getQuantity();
+            if (material.getStock() < requiredQuantity) {
+                throw new BusinessRuleException("Not enough stock for material: " + material.getName());
+            }
+            material.setStock(material.getStock() - requiredQuantity);
+            rawMaterialRepository.save(material);
+        }
+
         order.startProduction();
+
+        // Calculate end date
+        int totalProductionHours = product.getProductionTime() * order.getQuantity();
+        int productionDays = (int) Math.ceil((double) totalProductionHours / 8.0); // Assuming 8-hour work day
+        order.setEndDate(order.getStartDate().plusDays(productionDays));
+
         ProductionOrder updatedOrder = productionOrderRepository.save(order);
         return productionOrderMapper.toResponseDTO(updatedOrder);
     }

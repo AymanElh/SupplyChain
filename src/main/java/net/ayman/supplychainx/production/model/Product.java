@@ -2,6 +2,8 @@ package net.ayman.supplychainx.production.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -13,7 +15,7 @@ import java.util.List;
 @Table(name = "products")
 @SQLDelete(sql = "UPDATE products SET is_deleted = true, deleted_at = NOW()")
 @SQLRestriction("is_deleted = false")
-@Data
+@Getter @Setter
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
