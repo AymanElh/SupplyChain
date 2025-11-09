@@ -1,15 +1,12 @@
 package net.ayman.supplychainx.user.controller;
 
-import jakarta.servlet.http.HttpSession;
+import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.user.model.Role;
 import net.ayman.supplychainx.user.service.RoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/roles")
@@ -21,43 +18,31 @@ public class RoleController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAll(HttpSession session) {
-        String userEmail = (String) session.getAttribute("userEmail");
-        String userRole = (String) session.getAttribute("userRole");
-
-        Map<String, String> error = new HashMap<>();
-        if (userEmail == null) {
-            error.put("error", "unauthorized");
-            error.put("status", "401");
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(error);
-        }
-
-        if(!userRole.equals("ADMIN")) {
-            error.put("error", "Forbidden");
-            error.put("status", "403");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
-        }
+    @RequiredRole({"ADMIN"})
+    public ResponseEntity<?> getAll() {
         return new ResponseEntity<>(roleService.getAllRoles(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @RequiredRole({"ADMIN"})
     public ResponseEntity<Role> getById(@PathVariable("id") Long id) {
         return new ResponseEntity<>(roleService.findById(id), HttpStatus.OK);
     }
 
     @PostMapping
+    @RequiredRole({"ADMIN"})
     public ResponseEntity<Role> createRole(@RequestBody Role role) {
         return new ResponseEntity<>(roleService.createRole(role), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @RequiredRole({"ADMIN"})
     public ResponseEntity<Role> updateRole(@PathVariable Long id, @RequestBody Role updatedRole) {
         return new ResponseEntity<>(roleService.updateRole(id, updatedRole), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
+    @RequiredRole({"ADMIN"})
     public void deleteRole(@PathVariable("id") Long id) {
         roleService.delete(id);
     }

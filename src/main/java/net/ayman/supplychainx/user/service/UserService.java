@@ -76,6 +76,7 @@ public class UserService {
         }
 
         LoginResponseDTO loginResponse = new LoginResponseDTO();
+        loginResponse.setUserId(user.getId());
         loginResponse.setName(user.getName());
         loginResponse.setEmail(user.getEmail());
         loginResponse.setPhone(user.getPhone());

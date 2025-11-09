@@ -2,6 +2,7 @@ package net.ayman.supplychainx.user.controller;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import net.ayman.supplychainx.user.dto.UserRequestDTO;
 import net.ayman.supplychainx.user.dto.UserResponseDTO;
 import net.ayman.supplychainx.user.dto.login.LoginRequestDTO;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 public class AuthController {
@@ -29,6 +31,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO, HttpSession session) {
         LoginResponseDTO loginResp = userService.login(loginRequestDTO);
+        log.debug("Login response: {}", loginResp);
+        session.setAttribute("currentUser", loginResp);
         session.setAttribute("userId", loginResp.getUserId());
         session.setAttribute("userName", loginResp.getName());
         session.setAttribute("userEmail", loginResp.getEmail());

@@ -2,9 +2,14 @@ package net.ayman.supplychainx.common.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
+import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
 import net.ayman.supplychainx.common.exception.UnauthorizedException;
 import net.ayman.supplychainx.user.dto.UserResponseDTO;
+import net.ayman.supplychainx.user.dto.login.LoginResponseDTO;
+import net.ayman.supplychainx.user.model.User;
+import net.ayman.supplychainx.user.repository.UserRepository;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -21,6 +26,12 @@ import java.util.Arrays;
 @Component
 public class AuthorizationAspect {
 
+    private final UserRepository userRepository;
+
+    public AuthorizationAspect(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Before("@annotation(net.ayman.supplychainx.common.security.RequiredRole)")
     public void checkAuthorization(JoinPoint joinPoint) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -32,11 +43,13 @@ public class AuthorizationAspect {
         HttpServletRequest request = attributes.getRequest();
         HttpSession session = request.getSession(false);
 
+
+
         if (session == null) {
             throw new UnauthorizedException("You are not authorized to access this resource");
         }
 
-        UserResponseDTO currentUser = (UserResponseDTO) session.getAttribute("currentUser");
+        LoginResponseDTO currentUser = (LoginResponseDTO) session.getAttribute("currentUser");
 
         if (currentUser == null) {
             log.warn("No user found in session");

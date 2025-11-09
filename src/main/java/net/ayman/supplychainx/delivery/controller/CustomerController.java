@@ -3,6 +3,7 @@ package net.ayman.supplychainx.delivery.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.delivery.dto.address.AddressRequestDTO;
 import net.ayman.supplychainx.delivery.dto.address.AddressResponseDTO;
 import net.ayman.supplychainx.delivery.dto.customer.CustomerRequestDTO;
@@ -29,11 +30,15 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
+    // US30: Add client - GESTIONNAIRE_COMMERCIAL
+    @RequiredRole({"GESTIONNAIRE_COMMERCIAL"})
     @PostMapping
     public ResponseEntity<CustomerResponseDTO> addCustomer(@Valid @RequestBody CustomerRequestDTO customerRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(customerService.addCustomer(customerRequestDTO));
     }
 
+    // US33: View all clients - GESTIONNAIRE_COMMERCIAL
+    @RequiredRole({"GESTIONNAIRE_COMMERCIAL"})
     @GetMapping
     public ResponseEntity<Page<CustomerResponseDTO>> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -44,21 +49,28 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getAllCustomers(pageable));
     }
 
+    @RequiredRole({"GESTIONNAIRE_COMMERCIAL"})
     @PostMapping("/{id}/addresses")
     public ResponseEntity<CustomerResponseDTO> addAddressesToCustomer(@PathVariable Long id, @Valid @RequestBody AddressRequestDTO address) {
         return ResponseEntity.ok(customerService.addAddressesToCustomer(id, address));
     }
 
+    // US34: Search client by name - GESTIONNAIRE_COMMERCIAL
+    @RequiredRole({"GESTIONNAIRE_COMMERCIAL"})
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
+    // US31: Modify client - GESTIONNAIRE_COMMERCIAL
+    @RequiredRole({"GESTIONNAIRE_COMMERCIAL"})
     @PutMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> updateCustomerInfo(@PathVariable("id") Long id, @Valid @RequestBody CustomerRequestDTO customerRequestDTO) {
         return ResponseEntity.ok(customerService.editCustomerInfo(id, customerRequestDTO));
     }
 
+    // US32: Delete client if no active order - GESTIONNAIRE_COMMERCIAL
+    @RequiredRole({"GESTIONNAIRE_COMMERCIAL"})
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeCustomer(@PathVariable("id") Long id) {
         log.debug("Deleting customer with id {}", id);

@@ -2,6 +2,7 @@ package net.ayman.supplychainx.supply.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.supply.dto.supplier.SupplierRequestDTO;
 import net.ayman.supplychainx.supply.dto.supplier.SupplierResponseDTO;
 import net.ayman.supplychainx.supply.service.SupplierService;
@@ -25,6 +26,7 @@ public class SupplierController {
         this.supplierService = supplierService;
     }
 
+    @RequiredRole({"SUPERVISEUR_LOGISTIQUE"})
     @GetMapping
     public ResponseEntity<Page<SupplierResponseDTO>> getAllSuppliers(
             int page,
@@ -40,21 +42,25 @@ public class SupplierController {
         return ResponseEntity.ok(supplierService.getSupplierById(id));
     }
 
+    @RequiredRole({"RESPONSABLE_ACHATS"})
     @GetMapping("/search")
     public ResponseEntity<SupplierResponseDTO> searchByName(@RequestParam("name") String name) {
         return ResponseEntity.status(HttpStatus.OK).body(supplierService.searchByName(name));
     }
 
+    @RequiredRole({"GESTIONNAIRE_APPROVISIONNEMENT"})
     @PostMapping
     public ResponseEntity<SupplierResponseDTO> createSupplier(@Validated(OnCreate.class) @RequestBody SupplierRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(supplierService.createSupplier(dto));
     }
 
+    @RequiredRole({"GESTIONNAIRE_APPROVISIONNEMENT"})
     @PutMapping("/{id}")
     public ResponseEntity<SupplierResponseDTO> updateSupplier(@PathVariable("id") Long id, @Valid @RequestBody SupplierRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.OK).body(supplierService.updateSupplier(id, dto));
     }
 
+    @RequiredRole({"GESTIONNAIRE_APPROVISIONNEMENT"})
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSupplier(@PathVariable("id") Long id) {
         supplierService.deleteSupplier(id);
