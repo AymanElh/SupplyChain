@@ -21,7 +21,7 @@ public class CustomerOrder {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(20) default 'PENDING'")
+    @Column
     private OrderStatus status = OrderStatus.PENDING;
 
     @Column(name = "order_date")

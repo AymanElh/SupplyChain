@@ -30,7 +30,7 @@ public class RoleController {
     }
 
     @PostMapping
-    @RequiredRole({"ADMIN"})
+//    @RequiredRole({"ADMIN"})
     public ResponseEntity<Role> createRole(@RequestBody Role role) {
         return new ResponseEntity<>(roleService.createRole(role), HttpStatus.CREATED);
     }
