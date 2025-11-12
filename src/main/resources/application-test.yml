@@ -1,0 +1,18 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+logging:
+  level:
+    root: WARN
+    net.ayman.supplychainx: INFO
+    org.testcontainers: WARN
+
+# Disable unnecessary features during tests
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

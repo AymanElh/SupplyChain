@@ -1,14 +1,22 @@
-# Step 1: Use an official OpenJDK base image from Docker Hub
-FROM eclipse-temurin:21-jdk
-
-# Step 2: Set the working directory inside the container
+# Build stage
+FROM eclipse-temurin:21-jdk AS builder
 WORKDIR /app
+COPY . .
+COPY .mvn .mvn
+COPY mvnw .
+COPY pom.xml .
+RUN ./mvnw dependency:go-offline -B
+COPY src ./src
+RUN ./mvnw clean package -DskipTests
 
-# Step 3: Copy the Spring Boot JAR file into the container
-COPY target/SupplyChainX-0.0.1-SNAPSHOT.jar /app/SupplyChainX-0.0.1-SNAPSHOT.jar
-
-# Step 4: Expose the port your application runs on
+# Run Time stage
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+RUN groupadd -r spring && useradd -r -g spring spring
+COPY --from=builder /app/target/SupplyChainX-0.0.1-SNAPSHOT.jar /app/myapp.jar
+RUN chown -R spring:spring /app
+USER spring
 EXPOSE 8080
-
-# Step 5: Define the command to run your Spring Boot application
-CMD ["java", "-jar", "/app/SupplyChainX-0.0.1-SNAPSHOT.jar"]
+HEALTHCHECK --interval=30s --timeout=5s \
+  CMD curl -f http://localhost:8080/health || exit 1
+ENTRYPOINT ["java", "-jar", "/app/myapp.jar"]
