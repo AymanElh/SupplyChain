@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "suppliers")
-@Getter @Setter
+@Getter @Setter @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Supplier {

@@ -1,8 +1,7 @@
-package net.ayman.supplychainx;
+package net.ayman.supplychainx.supply;
 
+import net.ayman.supplychainx.AbstractIntegrationTest;
 import net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialRequest;
-import net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse;
-import net.ayman.supplychainx.supply.mapper.RawMaterialMapper;
 import net.ayman.supplychainx.supply.model.RawMaterial;
 import net.ayman.supplychainx.supply.repository.RawMaterialRepository;
 import net.ayman.supplychainx.supply.service.RawMaterialService;
@@ -20,8 +19,8 @@ public class RawMaterialIntegrationTest extends AbstractIntegrationTest {
     private RawMaterialService materialService;
     @Autowired
     private RawMaterialRepository materialRepository;
-
     private RawMaterialRequest materialRequest;
+
 
     @BeforeEach
     void setUp() {

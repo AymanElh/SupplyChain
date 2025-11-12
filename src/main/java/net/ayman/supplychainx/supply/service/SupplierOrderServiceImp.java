@@ -89,8 +89,6 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
         }
 
         order.setItems(items);
-        // check if the target supplier has the materials on the order
-        System.out.println("Supplier in the order: " + order.getSupplier().getMaterials());
 
         items.forEach(item -> {
             item.setOrder(order);
@@ -115,7 +113,7 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
 
         if (order.getStatus() == OrderStatus.RECEIVED) {
             log.warn("Attemped to change status of received order");
-            throw new IllegalArgumentException("Change status of received order");
+            throw new IllegalArgumentException("Order is already received and cannot be updated");
         }
 
         order.setStatus(status);
@@ -133,7 +131,7 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
 
         for (SupplierOrderItem item: order.getItems()) {
             RawMaterial material = item.getRawMaterial();
-            int oldStock = material.getStock();
+//            int oldStock = material.getStock();
             material.updateStock(item.getQuantity());
         }
 

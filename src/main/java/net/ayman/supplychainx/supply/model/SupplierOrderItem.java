@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "supply_order_items")
-@Data
+@Data @Builder
 //@Getter
 //@Setter
 @NoArgsConstructor
