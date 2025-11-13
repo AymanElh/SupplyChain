@@ -1,4 +1,4 @@
-package net.ayman.supplychainx;
+package net.ayman.supplychainx.supply;
 
 import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
 import net.ayman.supplychainx.supply.dto.order.SupplierOrderResponseDTO;
@@ -9,9 +9,7 @@ import net.ayman.supplychainx.supply.mapper.SupplierOrderMapper;
 import net.ayman.supplychainx.supply.repository.RawMaterialRepository;
 import net.ayman.supplychainx.supply.repository.SupplierOrderRepository;
 import net.ayman.supplychainx.supply.repository.SupplierRepository;
-import net.ayman.supplychainx.supply.service.SupplierOrderService;
 import net.ayman.supplychainx.supply.service.SupplierOrderServiceImp;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,10 +19,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -225,6 +226,196 @@ public class SupplierOrderServiceTest {
             assertThat(item2.getQuantity()).isEqualTo(50);
             assertThat(item2.getUnitPrice()).isEqualTo(25.00);
             assertThat(item2.getSubTotal()).isEqualTo(1250.00);
+        }
+    }
+
+    @Nested
+    @DisplayName("Update Order Tests")
+    class UpdateOrderTests {
+        @Test
+        @DisplayName("Should update order status successfully")
+        void shouldUpdateOrderStatusSuccessfully() {
+            order.setStatus(OrderStatus.WAITING);
+
+            when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+            when(orderRepository.save(any(SupplierOrder.class))).thenReturn(order);
+            when(orderMapper.toResponseDTO(any(SupplierOrder.class)))
+                    .thenReturn(new SupplierOrderResponseDTO());
+
+            // When
+            SupplierOrderResponseDTO result = orderService.updateOrderStatus(1L, OrderStatus.RECEIVED);
+
+            // Then
+            assertThat(result).isNotNull();
+
+            verify(orderRepository, times(1)).findById(1L);
+            verify(orderRepository, times(1)).save(any(SupplierOrder.class));
+
+            ArgumentCaptor<SupplierOrder> orderCaptor = ArgumentCaptor.forClass(SupplierOrder.class);
+            verify(orderRepository).save(orderCaptor.capture());
+            SupplierOrder updatedOrder = orderCaptor.getValue();
+
+            assertThat(updatedOrder.getStatus()).isEqualTo(OrderStatus.RECEIVED);
+        }
+
+        @Test
+        @DisplayName("Should not update order status if already RECEIVED")
+        void shouldNotUpdate_WhenOrderAlreadyReceived() {
+            order.setStatus(OrderStatus.RECEIVED);
+
+            when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+            assertThatThrownBy(() -> orderService.updateOrderStatus(1L, OrderStatus.IN_PROGRESS))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Order is already received and cannot be updated");
+
+
+            verify(orderRepository, times(1)).findById(1L);
+            verify(orderRepository, never()).save(any());
+        }
+
+
+        @Test
+        @DisplayName("Should receive order and update stock levels")
+        void shouldReceiveOrderAndUpdateStock_WhenOrderIsWaiting() {
+            RawMaterial mat1 = RawMaterial.builder()
+                    .id(1L)
+                    .name("Material 1")
+                    .stock(200)
+                    .build();
+
+            RawMaterial mat2 = RawMaterial.builder()
+                    .id(2L)
+                    .name("Material 2")
+                    .stock(100)
+                    .build();
+
+            SupplierOrderItem item1 = SupplierOrderItem.builder()
+                    .id(1L)
+                    .rawMaterial(mat1)
+                    .quantity(50)
+                    .unitPrice(10.0)
+                    .subTotal(500.0)
+                    .build();
+
+            SupplierOrderItem item2 = SupplierOrderItem.builder()
+                    .id(2L)
+                    .rawMaterial(mat2)
+                    .quantity(30)
+                    .unitPrice(20.0)
+                    .subTotal(600.0)
+                    .build();
+
+            order.setStatus(OrderStatus.IN_PROGRESS);
+            order.setItems(Arrays.asList(item1, item2));
+
+            item1.setOrder(order);
+            item2.setOrder(order);
+            when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+            when(orderRepository.save(any(SupplierOrder.class))).thenReturn(order);
+            when(orderMapper.toResponseDTO(any(SupplierOrder.class)))
+                    .thenReturn(new SupplierOrderResponseDTO());
+
+            SupplierOrderResponseDTO result = orderService.receiveOrder(1L);
+
+            ArgumentCaptor<SupplierOrder> orderCaptor = ArgumentCaptor.forClass(SupplierOrder.class);
+            verify(orderRepository).save(orderCaptor.capture());
+            SupplierOrder updatedOrder = orderCaptor.getValue();
+            assertThat(updatedOrder.getStatus()).isEqualTo(OrderStatus.RECEIVED);
+
+            assertThat(result).isNotNull();
+            assertThat(mat1.getStock()).isEqualTo(250);
+            assertThat(mat2.getStock()).isEqualTo(130);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when receiving an already RECEIVED order")
+        void updateOrderWithStatusReceived_ShouldThrowException() {
+            order.setStatus(OrderStatus.RECEIVED);
+
+            when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+            assertThatThrownBy(() -> orderService.receiveOrder(1L))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Order already received");
+
+            verify(orderRepository, times(1)).findById(1L);
+            verify(orderRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Delete Order Tests")
+    class DeleteOrderTests {
+        @Test
+        @DisplayName("Should delete order successfully")
+        void deleteOrder_successfully() {
+            when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+            orderService.deleteOrder(1L);
+            System.out.println("order isDeleted: " + order.isDeleted());
+            verify(orderRepository, times(1)).findById(1L);
+            verify(orderRepository, times(1)).save(any(SupplierOrder.class));
+        }
+
+        @Test
+        @DisplayName("Should not delete order if already RECEIVED")
+        void deleteOrder_whenAlreadyReceived_ShouldThrowException() {
+            order.setStatus(OrderStatus.RECEIVED);
+            when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+            assertThatThrownBy(() -> orderService.deleteOrder(1L))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Cannot delete received order");
+
+            verify(orderRepository, times(1)).findById(1L);
+            verify(orderRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Read Order Tests")
+    class ReadOrderTests {
+        @Test
+        @DisplayName("Should get all orders successfully")
+        void getAllOrders_successfully() {
+            SupplierOrder anotherOrder = new SupplierOrder();
+            anotherOrder.setId(2L);
+            anotherOrder.setSupplier(supplier);
+            anotherOrder.setStatus(OrderStatus.IN_PROGRESS);
+            anotherOrder.setOrderDate(LocalDate.now());
+
+            List<SupplierOrder> orders = Arrays.asList(order, anotherOrder);
+
+            Page<SupplierOrder> page = new PageImpl<>(orders);
+
+            when(orderRepository.findAll(any(Pageable.class))).thenReturn(page);
+            when(orderMapper.toResponseDTO(any(SupplierOrder.class)))
+                    .thenReturn(new SupplierOrderResponseDTO());
+
+            Pageable pageable = PageRequest.of(1, 10);
+            Page<SupplierOrderResponseDTO> results = orderService.getAll(pageable);
+
+            assertThat(results.getContent()).isNotNull();
+            assertThat(results.getContent()).hasSize(2);
+
+            verify(orderRepository, times(1)).findAll(pageable);
+            verify(orderMapper, times(2)).toResponseDTO(any(SupplierOrder.class));
+        }
+
+        @Test
+        @DisplayName("Should get order by ID successfully")
+        void getById_successfully() {
+            when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+            when(orderMapper.toResponseDTO(any(SupplierOrder.class)))
+                    .thenReturn(new SupplierOrderResponseDTO());
+
+            SupplierOrderResponseDTO result = orderService.getById(1L);
+
+            assertThat(result).isNotNull();
+
+            verify(orderRepository, times(1)).findById(1L);
+            verify(orderMapper, times(1)).toResponseDTO(any(SupplierOrder.class));
         }
     }
 }

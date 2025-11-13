@@ -2,11 +2,12 @@ package net.ayman.supplychainx.supply.dto.supplier;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.ayman.supplychainx.validation.OnCreate;
 
-@Data
+@Data @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SupplierRequestDTO {

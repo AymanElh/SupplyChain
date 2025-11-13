@@ -2,6 +2,7 @@ package net.ayman.supplychainx.supply.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -12,7 +13,7 @@ import java.util.List;
 @Entity
 @Table(name = "raw_materials")
 @SQLDelete(sql = "UPDATE raw_materials SET is_deleted = true, deleted_at = NOW()")
-@Data
+@Data @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RawMaterial {
