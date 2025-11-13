@@ -23,7 +23,7 @@ public class RawMaterialController {
         this.rawMaterialService = rawMaterialService;
     }
 
-    @RequiredRole({"SUPERVISEUR_LOGISTIQUE"})
+    @RequiredRole({"ADMIN"})
     @GetMapping
     public ResponseEntity<Page<RawMaterialResponse>> getAllMaterials(
             int page,

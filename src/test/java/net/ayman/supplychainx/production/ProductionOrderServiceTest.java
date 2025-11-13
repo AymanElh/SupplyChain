@@ -1,4 +1,4 @@
-package net.ayman.supplychainx;
+package net.ayman.supplychainx.production;
 
 import net.ayman.supplychainx.production.dto.order.ProductionOrderRequestDTO;
 import net.ayman.supplychainx.production.dto.order.ProductionOrderResponseDTO;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Production order service tests")
-public class ProductionOrderServiceTest {
+class ProductionOrderServiceTest {
 
     @Mock private ProductionOrderRepository orderRepository;
     @Mock private ProductRepository productRepository;

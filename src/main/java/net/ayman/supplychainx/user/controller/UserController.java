@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.user.dto.UserRequestDTO;
 import net.ayman.supplychainx.user.dto.UserResponseDTO;
 import net.ayman.supplychainx.user.repository.UserRepository;
@@ -33,6 +34,7 @@ public class UserController {
     }
 
     @GetMapping
+    @RequiredRole({"ADMIN"})
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAll());
     }

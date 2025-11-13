@@ -49,7 +49,7 @@ public class BillOfMaterialServiceImp implements BillOfMaterialService {
         bom.setQuantity(bomDTO.getQuantity());
         log.info("Mapping bom from dto to entity: {} to {}", bomDTO, bom);
         BillOfMaterial savedBom = billOfMaterialRepository.save(bom);
-        return billOfMaterialMapper.toResponseDTO(bom);
+        return billOfMaterialMapper.toResponseDTO(savedBom);
     }
 
     @Override

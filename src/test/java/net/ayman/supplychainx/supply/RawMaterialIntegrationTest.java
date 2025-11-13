@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DisplayName(("Raw Material Integration Tests"))
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class RawMaterialIntegrationTest extends AbstractIntegrationTest {
+class RawMaterialIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private RawMaterialService materialService;
     @Autowired

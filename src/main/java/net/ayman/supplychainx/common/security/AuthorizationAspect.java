@@ -14,6 +14,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 @Slf4j
 @Aspect
 @Component
+@Order(1)
 public class AuthorizationAspect {
 
     private final UserRepository userRepository;
@@ -34,6 +36,9 @@ public class AuthorizationAspect {
 
     @Before("@annotation(net.ayman.supplychainx.common.security.RequiredRole)")
     public void checkAuthorization(JoinPoint joinPoint) {
+
+        log.debug("Authorization aspect triggered for method: " + joinPoint.getSignature().getName());
+
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
         if(attributes == null) {
@@ -42,8 +47,6 @@ public class AuthorizationAspect {
 
         HttpServletRequest request = attributes.getRequest();
         HttpSession session = request.getSession(false);
-
-
 
         if (session == null) {
             throw new UnauthorizedException("You are not authorized to access this resource");
@@ -57,7 +60,9 @@ public class AuthorizationAspect {
         }
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        log.info("Method signature: " + signature);
         Method method = signature.getMethod();
+        log.info("Method: " + method.getName());
         RequiredRole requireRole = method.getAnnotation(RequiredRole.class);
 
         String[] requiredRoles = requireRole.value();

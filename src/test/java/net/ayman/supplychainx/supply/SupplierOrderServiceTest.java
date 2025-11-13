@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Supplier order service tests")
-public class SupplierOrderServiceTest {
+class SupplierOrderServiceTest {
 
     @Mock private SupplierOrderRepository orderRepository;
 
