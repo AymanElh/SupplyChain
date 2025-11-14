@@ -143,5 +143,5 @@ jobs:
           build-args: |
             PROFILE:dev
             APP_VERSION:${{steps.extract_version.outputs.VERSION}}
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/myapp:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/myapp:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/supplychainx-api:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/supplychainx-api:buildcache,mode=max

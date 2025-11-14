@@ -26,8 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -206,7 +206,7 @@ class BillOfMaterialServiceTest {
             List<BillOfMaterialResponseDTO> result = billOfMaterialService.getProductBill(PRODUCT_ID);
 
             assertThat(result).isNotNull();
-            assertThat(result.size()).isEqualTo(2);
+            assertThat(result).hasSize(2);
 
             verify(billOfMaterialRepository, times(1)).findByProductId(PRODUCT_ID);
             verify(billOfMaterialMapper, times(2)).toResponseDTO(any(BillOfMaterial.class));
@@ -219,8 +219,11 @@ class BillOfMaterialServiceTest {
 
             List<BillOfMaterialResponseDTO> result = billOfMaterialService.getProductBill(PRODUCT_ID);
 
-            assertThat(result).isNotNull();
-            assertThat(result.size()).isEqualTo(0);
+            assertThat(result)
+                    .isNotNull()
+                    .isEmpty();
+
+            assertThat(result).isNotNull().isEmpty();
 
             verify(billOfMaterialRepository, times(1)).findByProductId(PRODUCT_ID);
             verify(billOfMaterialMapper, never()).toResponseDTO(any());

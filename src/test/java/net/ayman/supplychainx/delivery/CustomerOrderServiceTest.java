@@ -327,7 +327,7 @@ class CustomerOrderServiceTest {
             List<CustomerOrderResponseDTO> result = customerOrderService.getOrdersByCustomerId(CUSTOMER_ID);
 
             assertThat(result).isNotNull();
-            assertThat(result.size()).isEqualTo(1);
+            assertThat(result.size()).isOne();
 
             verify(customerOrderRepository, times(1)).existsById(CUSTOMER_ID);
             verify(customerOrderRepository, times(1)).findByCustomerId(CUSTOMER_ID);
