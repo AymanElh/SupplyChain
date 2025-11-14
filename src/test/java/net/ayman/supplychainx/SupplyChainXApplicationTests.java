@@ -1,9 +1,7 @@
 package net.ayman.supplychainx;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 class SupplyChainXApplicationTests {
 
     @Test
@@ -11,4 +9,10 @@ class SupplyChainXApplicationTests {
         assert true;
     }
 
+    @Test
+    void applicationStarts() {
+        // Test that the main method can be called
+        SupplyChainXApplication.main(new String[]{});
+        assert true;
+    }
 }
