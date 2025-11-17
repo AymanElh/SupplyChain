@@ -19,7 +19,7 @@ WORKDIR /app
 
 RUN groupadd -r spring && useradd -r -g spring spring
 
-COPY --from=builder /app/target/SupplyChainX-*.jar /app/
+COPY --from=builder /app/target/SupplyChainX-${APP_VERSION}.jar /app/app.jar
 
 RUN chown -R spring:spring /app
 
@@ -32,6 +32,6 @@ ENV ACTIVE_PROFILE=${PROFILE}
 ENV JAR_VERSION=${APP_VERSION}
 
 HEALTHCHECK --interval=30s --timeout=5s \
-  CMD curl -f http://localhost:8080/health || exit 1
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-CMD java -jar -Dspring.profiles.active=${ACTIVE_PROFILE} -Dspring.datasource.url=${DB_URL} SupplyChainX-${APP_VERSION}.jar
+CMD java -jar -Dspring.profiles.active=${ACTIVE_PROFILE} -Dspring.datasource.url=${DB_URL} app.jar
