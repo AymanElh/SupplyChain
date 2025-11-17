@@ -138,8 +138,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/myapp:${{steps.extract_version.outputs.VERSION}}
-            ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/supplychainx-api:${{steps.extract_version.outputs.VERSION}}
+            ${{ secrets.DOCKERHUB_USERNAME }}/supplychainx-api:latest
           build-args: |
             PROFILE:dev
             APP_VERSION:${{steps.extract_version.outputs.VERSION}}
