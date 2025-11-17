@@ -11,12 +11,27 @@ RUN ./mvnw clean package -DskipTests
 
 # Run Time stage
 FROM eclipse-temurin:21-jre
+
+ARG PROFILE=dev
+ARG APP_VERSION=1.0.0
+
 WORKDIR /app
+
 RUN groupadd -r spring && useradd -r -g spring spring
-COPY --from=builder /app/target/SupplyChainX-0.0.1-SNAPSHOT.jar /app/myapp.jar
+
+COPY --from=builder /app/target/SupplyChainX-*.jar /app/
+
 RUN chown -R spring:spring /app
+
 USER spring
+
 EXPOSE 8080
+
+ENV DB_URL=jdbc:postgresql://db:5432/supply_db
+ENV ACTIVE_PROFILE=${PROFILE}
+ENV JAR_VERSION=${APP_VERSION}
+
 HEALTHCHECK --interval=30s --timeout=5s \
   CMD curl -f http://localhost:8080/health || exit 1
-ENTRYPOINT ["java", "-jar", "/app/myapp.jar"]
+
+CMD java -jar -Dspring.profiles.active=${ACTIVE_PROFILE} -Dspring.datasource.url=${DB_URL} SupplyChainX-${APP_VERSION}.jar
