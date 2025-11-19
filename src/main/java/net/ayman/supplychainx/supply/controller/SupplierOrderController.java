@@ -61,4 +61,5 @@ public class SupplierOrderController {
         log.info("REST request to update status for order id: {} to {}", id, dto.getStatus());
         return ResponseEntity.ok(supplierOrderService.updateOrderStatus(id, dto.getStatus()));
     }
+
 }

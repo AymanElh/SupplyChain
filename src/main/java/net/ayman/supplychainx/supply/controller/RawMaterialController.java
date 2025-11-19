@@ -38,19 +38,19 @@ public class RawMaterialController {
         return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.getById(id));
     }
 
-    @RequiredRole({"GESTIONNAIRE_APPROVISIONNEMENT"})
+    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
     @PostMapping
     public ResponseEntity<RawMaterialResponse> createMaterial(@Valid @RequestBody RawMaterialRequest materialDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rawMaterialService.createNewMaterial(materialDto));
     }
 
-    @RequiredRole({"GESTIONNAIRE_APPROVISIONNEMENT"})
+    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
     @PutMapping("/{id}")
     public ResponseEntity<RawMaterialResponse> updateMaterial(@PathVariable Long id, @Valid @RequestBody RawMaterialRequest materialRequest) {
         return ResponseEntity.ok(rawMaterialService.updateMaterial(id, materialRequest));
     }
 
-    @RequiredRole({"GESTIONNAIRE_APPROVISIONNEMENT"})
+    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMaterial(@PathVariable("id") Long id) {
         rawMaterialService.deleteMaterial(id);
