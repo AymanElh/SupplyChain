@@ -23,9 +23,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Slf4j
-@Aspect
-@Component
-@Order(1)
+//@Aspect
+//@Component
+//@Order(1)
 public class AuthorizationAspect {
 
     private final UserRepository userRepository;

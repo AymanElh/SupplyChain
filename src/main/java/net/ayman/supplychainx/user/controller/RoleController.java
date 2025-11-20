@@ -5,6 +5,8 @@ import net.ayman.supplychainx.user.model.Role;
 import net.ayman.supplychainx.user.service.RoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -20,6 +22,7 @@ public class RoleController {
     @GetMapping
     @RequiredRole({"ADMIN"})
     public ResponseEntity<?> getAll() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return new ResponseEntity<>(roleService.getAllRoles(), HttpStatus.OK);
     }
 
