@@ -13,7 +13,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "products")
-@SQLDelete(sql = "UPDATE products SET is_deleted = true, deleted_at = NOW()")
+@SQLDelete(sql = "UPDATE products SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 @Getter @Setter
 public class Product {
