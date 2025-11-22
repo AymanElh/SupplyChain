@@ -13,6 +13,7 @@ import net.ayman.supplychainx.supply.repository.SupplierRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +110,9 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
     @Override
     public SupplierOrderResponseDTO updateOrderStatus(Long id, OrderStatus status) {
         log.info("Updating status for order Id: {} to {}", id, status);
+        if (status == OrderStatus.RECEIVED) {
+            return receiveOrder(id);
+        }
         SupplierOrder order = supplierOrderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         if (order.getStatus() == OrderStatus.RECEIVED) {
@@ -117,12 +121,15 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
         }
 
         order.setStatus(status);
+
+
         SupplierOrder updatedOrder = supplierOrderRepository.save(order);
         log.info("Order status updated successfully {} -> {}", order.getStatus(), status);
         return supplierOrderMapper.toResponseDTO(updatedOrder);
     }
 
     @Override
+    @Transactional
     public SupplierOrderResponseDTO receiveOrder(Long id) {
         SupplierOrder order = supplierOrderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("This order with id " + id + " not found"));
         if (order.getStatus() == OrderStatus.RECEIVED) {
@@ -133,6 +140,7 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
             RawMaterial material = item.getRawMaterial();
 //            int oldStock = material.getStock();
             material.updateStock(item.getQuantity());
+            rawMaterialRepository.save(material);
         }
 
         order.markReceived();
@@ -140,6 +148,7 @@ public class SupplierOrderServiceImp implements SupplierOrderService {
     }
 
     @Override
+    @Transactional
     public void deleteOrder(Long id) {
         SupplierOrder order = supplierOrderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
