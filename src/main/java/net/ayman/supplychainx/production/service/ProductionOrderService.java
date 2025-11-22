@@ -13,6 +13,7 @@ public interface ProductionOrderService {
     Page<ProductionOrderResponseDTO> getAll(Pageable pageable);
     Page<ProductionOrderResponseDTO> getByStatus(Pageable pageable, ProductionStatus status);
     ProductionOrderResponseDTO updateStatus(Long orderId, ProductionStatus status);
+    ProductionOrderResponseDTO updateQuantity(Long orderId, Integer quantity);
     ProductionOrderResponseDTO startProduction(Long orderId);
     ProductionOrderResponseDTO completeProduction(Long orderId);
     void cancelOrder(Long id);

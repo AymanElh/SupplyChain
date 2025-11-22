@@ -5,6 +5,7 @@ import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.production.dto.order.ProductionOrderRequestDTO;
 import net.ayman.supplychainx.production.dto.order.ProductionOrderResponseDTO;
 import net.ayman.supplychainx.production.dto.order.UpdateProductionOrderStatusDTO;
+import net.ayman.supplychainx.production.dto.product.UpdateProductQuantityDTO;
 import net.ayman.supplychainx.production.model.ProductionOrder;
 import net.ayman.supplychainx.production.model.ProductionStatus;
 import net.ayman.supplychainx.production.service.ProductionOrderService;
@@ -70,7 +71,20 @@ public class ProductionOrderController {
         return ResponseEntity.ok(productionOrderService.updateStatus(orderId, dto.getStatus()));
     }
 
+<<<<<<< Updated upstream
     @RequiredRole({"PLANIFICATEUR"})
+=======
+<<<<<<< Updated upstream
+=======
+
+    @PatchMapping("/{id}/quantity")
+    public ResponseEntity<ProductionOrderResponseDTO> updateQuantity(@PathVariable("id") Long orderId, @Valid @RequestBody UpdateProductQuantityDTO dto) {
+        return ResponseEntity.ok(productionOrderService.updateQuantity(orderId, dto.quantity()));
+    }
+
+    @RequiredRole({"PLANIFICATEUR"})
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     @PostMapping("/{id}/start-production")
     public ResponseEntity<ProductionOrderResponseDTO> startProd(@PathVariable("id") Long id) {
         return ResponseEntity.ok(productionOrderService.startProduction(id));

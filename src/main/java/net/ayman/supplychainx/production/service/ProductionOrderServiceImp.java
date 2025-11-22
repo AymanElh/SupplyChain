@@ -18,6 +18,7 @@ import net.ayman.supplychainx.supply.repository.RawMaterialRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,6 +43,7 @@ public class ProductionOrderServiceImp implements ProductionOrderService {
     }
 
     @Override
+    @Transactional
     public ProductionOrderResponseDTO createOrder(ProductionOrderRequestDTO dto) {
         Product product = productRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product with this id " + dto.getProductId() + " not found"));
@@ -83,6 +85,19 @@ public class ProductionOrderServiceImp implements ProductionOrderService {
     }
 
     @Override
+    @Transactional
+    public ProductionOrderResponseDTO updateQuantity(Long orderId, Integer quantity) {
+        ProductionOrder order = productionOrderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order with id " + orderId + " not found"));
+
+        if (order.getStatus() == ProductionStatus.IN_WAITING) {
+            order.setQuantity(quantity);
+        }
+        return productionOrderMapper.toResponseDTO(order);
+    }
+
+    @Override
+    @Transactional
     public ProductionOrderResponseDTO startProduction(Long orderId) {
         ProductionOrder order = productionOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -116,6 +131,7 @@ public class ProductionOrderServiceImp implements ProductionOrderService {
     }
 
     @Override
+    @Transactional
     public ProductionOrderResponseDTO completeProduction(Long orderId) {
         ProductionOrder order = productionOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -132,6 +148,7 @@ public class ProductionOrderServiceImp implements ProductionOrderService {
     }
 
     @Override
+    @Transactional
     public void cancelOrder(Long id) {
         ProductionOrder order = productionOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order with id " + id + " not found"));
