@@ -35,6 +35,23 @@ public class SupplyChainXApplication {
 
                 userRepository.save(admin);
             }
+
+            if (userRepository.findByEmail("user@gmail.com").isEmpty()) {
+
+                Role userRole = roleRepository.findByName("guest").orElseGet(() -> {
+                    Role role = new Role();
+                    role.setName("guest");
+                    return roleRepository.save(role);
+                });
+
+                User user = new User();
+                user.setName("user user");
+                user.setEmail("user@gmail.com");
+                user.setPassword(passwordEncoder.encode("123456"));
+                user.setRole(userRole);
+
+                userRepository.save(user);
+            }
         };
     }
 }
