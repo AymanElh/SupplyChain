@@ -78,8 +78,6 @@ public class ProductionOrderController {
     }
 
     @RequiredRole({"PLANIFICATEUR"})
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     @PostMapping("/{id}/start-production")
     public ResponseEntity<ProductionOrderResponseDTO> startProd(@PathVariable("id") Long id) {
         return ResponseEntity.ok(productionOrderService.startProduction(id));
