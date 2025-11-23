@@ -71,12 +71,7 @@ public class ProductionOrderController {
         return ResponseEntity.ok(productionOrderService.updateStatus(orderId, dto.getStatus()));
     }
 
-<<<<<<< Updated upstream
     @RequiredRole({"PLANIFICATEUR"})
-=======
-<<<<<<< Updated upstream
-=======
-
     @PatchMapping("/{id}/quantity")
     public ResponseEntity<ProductionOrderResponseDTO> updateQuantity(@PathVariable("id") Long orderId, @Valid @RequestBody UpdateProductQuantityDTO dto) {
         return ResponseEntity.ok(productionOrderService.updateQuantity(orderId, dto.quantity()));
