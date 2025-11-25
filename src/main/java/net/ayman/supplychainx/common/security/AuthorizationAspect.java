@@ -24,8 +24,8 @@ import java.util.Arrays;
 
 @Slf4j
 //@Aspect
-@Component
-@Order(1)
+//@Component
+//@Order(1)
 public class AuthorizationAspect {
 
     private final UserRepository userRepository;
@@ -68,8 +68,8 @@ public class AuthorizationAspect {
         String[] requiredRoles = requireRole.value();
 
         String userRole = currentUser.getRoleName();
-        boolean hasPermission = Arrays.asList(requiredRoles).contains(userRole.toUpperCase());
-        hasPermission = true;
+        boolean hasPermission = Arrays.asList(requiredRoles).contains(userRole);
+
         if (!hasPermission) {
             log.warn("User {} with role {} attempted to access method requiring roles: {}",
                     currentUser.getEmail(), userRole, Arrays.toString(requiredRoles));

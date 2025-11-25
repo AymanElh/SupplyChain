@@ -12,7 +12,12 @@ import net.ayman.supplychainx.user.repository.UserRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -23,11 +28,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UserResponseDTO> getAll() {
@@ -39,11 +46,14 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
+    @Transactional
     public UserResponseDTO createUser(UserRequestDTO userDTO) {
         User user = userMapper.toEntity(userDTO);
         if(userRepository.existsByEmail(user.getEmail())) {
             throw new EmailAlreadyExistException("This email is already exist");
         }
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashedPassword);
         return userMapper.toDTO(userRepository.save(user));
     }
 
@@ -71,7 +81,11 @@ public class UserService {
     public LoginResponseDTO login(LoginRequestDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new ResourceNotFoundException("User with this email not fount"));
 
-        if(!dto.getPassword().equals(user.getPassword())) {
+//        if(!dto.getPassword().equals(user.getPassword())) {
+//            throw new RuntimeException("Invalid credentials");
+//        }
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
@@ -83,4 +97,6 @@ public class UserService {
         loginResponse.setRoleName(user.getRole().getName());
         return loginResponse;
     }
+
+
 }

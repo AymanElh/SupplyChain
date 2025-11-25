@@ -1,10 +1,11 @@
 package net.ayman.supplychainx.user.dto.login;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+@Data @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResponseDTO {
