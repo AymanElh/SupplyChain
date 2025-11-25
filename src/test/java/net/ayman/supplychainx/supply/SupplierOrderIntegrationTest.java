@@ -12,7 +12,9 @@ import net.ayman.supplychainx.supply.repository.SupplierOrderRepository;
 import net.ayman.supplychainx.supply.repository.SupplierRepository;
 import net.ayman.supplychainx.user.dto.login.LoginRequestDTO;
 import net.ayman.supplychainx.user.dto.login.LoginResponseDTO;
+import net.ayman.supplychainx.user.model.Role;
 import net.ayman.supplychainx.user.model.User;
+import net.ayman.supplychainx.user.repository.RoleRepository;
 import net.ayman.supplychainx.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -49,12 +52,17 @@ public class SupplierOrderIntegrationTest extends AbstractIntegrationTest {
     RawMaterialRepository rawMaterialRepository;
     @Autowired
     SupplierRepository supplierRepository;
+    @Autowired
+    RoleRepository roleRepository;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     private Supplier supplier;
     private RawMaterial rawMaterial;
     private User user;
 
     private static final String ADMIN_EMAIL = "admin@gmail.com";
+    private static final String ADMIN_PASSWORD = "123456";
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -62,10 +70,17 @@ public class SupplierOrderIntegrationTest extends AbstractIntegrationTest {
     void setUp() {
         user = userRepository.findByEmail(ADMIN_EMAIL).orElse(null);
         if (user == null) {
+            Role role = roleRepository.findByName("RESPONSABLE_ACHATS").orElseGet(() -> {
+                Role newRole = new Role();
+                newRole.setName("RESPONSABLE_ACHATS");
+                return roleRepository.save(newRole);
+            });
+            
             user = new User();
             user.setEmail(ADMIN_EMAIL);
             user.setName("admin");
-            user.setPassword("password");
+            user.setPassword(passwordEncoder.encode(ADMIN_PASSWORD));
+            user.setRole(role);
             user = userRepository.save(user);
         }
 
@@ -101,20 +116,14 @@ public class SupplierOrderIntegrationTest extends AbstractIntegrationTest {
     void testCreateOrder_Successfully() throws Exception {
 
         LoginRequestDTO loginRequest = new LoginRequestDTO();
-        loginRequest.setEmail("admin@gmail.com");
-        loginRequest.setPassword("123456");
+        loginRequest.setEmail(ADMIN_EMAIL);
+        loginRequest.setPassword(ADMIN_PASSWORD);
 
-        String loginResponse = mockMvc.perform(post("/api/v1/login")
+        var loginResult = mockMvc.perform(post("/api/v1/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        // 3. Deserialize the LoginResponseDTO from the response
-        LoginResponseDTO loginResp = objectMapper.readValue(loginResponse, LoginResponseDTO.class);
-
+                .andReturn();
 
         SupplierOrderItemRequestDTO itemDto = new SupplierOrderItemRequestDTO();
         itemDto.setMaterialId(rawMaterial.getId());
@@ -126,11 +135,10 @@ public class SupplierOrderIntegrationTest extends AbstractIntegrationTest {
         orderDto.setOrderDate(LocalDate.now());
         orderDto.setItems(List.of(itemDto));
 
-        // 3. Perform the POST request to create the supplier order
+        // Use the session from the login request
         mockMvc.perform(post("/api/v1/supplier-orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("currentUser", loginResp) // Ensure the session contains the currentUser
-                        .sessionAttr("userId", user.getId()) // You might need to include other session attributes as needed
+                        .session((org.springframework.mock.web.MockHttpSession) loginResult.getRequest().getSession())
                         .content(objectMapper.writeValueAsString(orderDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.supplierId").value(supplier.getId()));

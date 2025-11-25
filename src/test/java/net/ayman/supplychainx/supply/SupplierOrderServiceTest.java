@@ -242,8 +242,8 @@ class SupplierOrderServiceTest {
             when(orderMapper.toResponseDTO(any(SupplierOrder.class)))
                     .thenReturn(new SupplierOrderResponseDTO());
 
-            // When
-            SupplierOrderResponseDTO result = orderService.updateOrderStatus(1L, OrderStatus.RECEIVED);
+            // When - Update to IN_PROGRESS instead of RECEIVED
+            SupplierOrderResponseDTO result = orderService.updateOrderStatus(1L, OrderStatus.IN_PROGRESS);
 
             // Then
             assertThat(result).isNotNull();
@@ -255,7 +255,7 @@ class SupplierOrderServiceTest {
             verify(orderRepository).save(orderCaptor.capture());
             SupplierOrder updatedOrder = orderCaptor.getValue();
 
-            assertThat(updatedOrder.getStatus()).isEqualTo(OrderStatus.RECEIVED);
+            assertThat(updatedOrder.getStatus()).isEqualTo(OrderStatus.IN_PROGRESS);
         }
 
         @Test
