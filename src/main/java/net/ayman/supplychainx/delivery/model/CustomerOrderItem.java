@@ -14,9 +14,14 @@ public class CustomerOrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Integer quantity;
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+//    @ManyToOne
+//    @JoinColumn(name = "product_id", nullable = false)
+//    private Product product;
+
+    // Store just the id for the separation of modules and easy migration to microservice
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
+
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
     private CustomerOrder order;

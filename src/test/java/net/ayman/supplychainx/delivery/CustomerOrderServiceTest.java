@@ -97,7 +97,7 @@ class CustomerOrderServiceTest {
 
         orderItem = new CustomerOrderItem();
         orderItem.setId(1L);
-        orderItem.setProduct(product);
+        orderItem.setProductId(product.getId());
         orderItem.setQuantity(QUANTITY);
         orderItem.setUnitPrice(UNIT_PRICE);
         orderItem.calculateSubTotal();

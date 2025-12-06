@@ -1,6 +1,7 @@
 package net.ayman.supplychainx.delivery.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.ayman.supplychainx.common.exception.BusinessRuleException;
 import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
@@ -11,6 +12,8 @@ import net.ayman.supplychainx.delivery.model.*;
 import net.ayman.supplychainx.delivery.repository.AddressRepository;
 import net.ayman.supplychainx.delivery.repository.CustomerOrderRepository;
 import net.ayman.supplychainx.delivery.repository.CustomerRepository;
+import net.ayman.supplychainx.production.api.ProductFacade;
+import net.ayman.supplychainx.production.dto.product.ProductResponseDTO;
 import net.ayman.supplychainx.production.model.Product;
 import net.ayman.supplychainx.production.repository.ProductRepository;
 import org.springframework.data.domain.Page;
@@ -18,10 +21,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CustomerOrderServiceImp implements CustomerOrderService {
 
 
@@ -29,15 +35,8 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
     private final CustomerOrderRepository customerOrderRepository;
     private final CustomerRepository customerRepository;
     private final AddressRepository addressRepository;
-    private final ProductRepository productRepository;
+    private final ProductFacade productFacade;
 
-    public CustomerOrderServiceImp(CustomerOrderMapper customerOrderMapper, CustomerOrderRepository customerOrderRepository, CustomerRepository customerRepository, AddressRepository addressRepository, ProductRepository productRepository) {
-        this.customerOrderMapper = customerOrderMapper;
-        this.customerOrderRepository = customerOrderRepository;
-        this.customerRepository = customerRepository;
-        this.addressRepository = addressRepository;
-        this.productRepository = productRepository;
-    }
 
     @Override
     @Transactional
@@ -58,11 +57,19 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
             throw new BusinessRuleException("Order items can't be empty");
         }
 
-        for (var item : dto.orderItems()) {
-            Product product = productRepository.findById(item.productId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product with id " + item.productId() + " not found"));
+        Map<Long, ProductResponseDTO> productCache = new HashMap<>();
 
-            if (product.getStock() < item.quantity()) {
+        for (var item : dto.orderItems()) {
+            ProductResponseDTO product = productCache.computeIfAbsent(
+                    item.productId(),
+                    id -> productFacade.getProductById(item.productId())
+            );
+
+//            if (product.getStock() < item.quantity()) {
+//                throw new BusinessRuleException("Product " + product.getName() + " has insufficient stock");
+//            }
+
+            if (!productFacade.hasAvailableStock(product.getId(), item.quantity())) {
                 throw new BusinessRuleException("Product " + product.getName() + " has insufficient stock");
             }
         }
@@ -74,17 +81,16 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
         order.setOrderDate(LocalDate.now());
 
         for (var item : dto.orderItems()) {
-            Product product = productRepository.findById(item.productId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product with id " + item.productId() + " not found"));
+            ProductResponseDTO product = productCache.get(item.productId());
 
             CustomerOrderItem orderItem = new CustomerOrderItem();
-            orderItem.setProduct(product);
+            orderItem.setProductId(product.getId());
             orderItem.setQuantity(item.quantity());
-            orderItem.setUnitPrice(item.unitPrice());
+            orderItem.setUnitPrice(product.getCost());
             orderItem.calculateSubTotal();
 
-            product.setStock(product.getStock() - item.quantity());
-
+//            product.setStock(product.getStock() - item.quantity());
+            productFacade.reserveStock(product.getId(), item.quantity());
             order.addOrderItem(orderItem);
         }
 
@@ -136,9 +142,11 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
         order.setStatus(OrderStatus.CANCELLED);
 
         for (CustomerOrderItem item: order.getItems()) {
-            Product product = item.getProduct();
-            product.setStock(product.getStock() + item.getQuantity());
-            productRepository.save(product);
+//            Product product = item.getProduct();
+//            product.setStock(product.getStock() + item.getQuantity());
+//            productRepository.save(product);
+
+            productFacade.releaseStock(item.getProductId(), item.getQuantity());
         }
 
         customerOrderRepository.delete(order);
