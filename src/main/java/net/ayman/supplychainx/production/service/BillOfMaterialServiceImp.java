@@ -1,5 +1,6 @@
 package net.ayman.supplychainx.production.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.ayman.supplychainx.common.exception.DuplicateResourceException;
 import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
@@ -10,33 +11,28 @@ import net.ayman.supplychainx.production.model.BillOfMaterial;
 import net.ayman.supplychainx.production.model.Product;
 import net.ayman.supplychainx.production.repository.BillOfMaterialRepository;
 import net.ayman.supplychainx.production.repository.ProductRepository;
-import net.ayman.supplychainx.supply.model.RawMaterial;
-import net.ayman.supplychainx.supply.repository.RawMaterialRepository;
+import net.ayman.supplychainx.supply.api.SupplyFacade;
+import net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class BillOfMaterialServiceImp implements BillOfMaterialService {
 
     private final ProductRepository productRepository;
-    private final RawMaterialRepository rawMaterialRepository;
     private final BillOfMaterialMapper billOfMaterialMapper;
     private final BillOfMaterialRepository billOfMaterialRepository;
-
-    public BillOfMaterialServiceImp(ProductRepository productRepository, RawMaterialRepository rawMaterialRepository, BillOfMaterialMapper billOfMaterialMapper, BillOfMaterialRepository billOfMaterialRepository) {
-        this.productRepository = productRepository;
-        this.rawMaterialRepository = rawMaterialRepository;
-        this.billOfMaterialMapper = billOfMaterialMapper;
-        this.billOfMaterialRepository = billOfMaterialRepository;
-    }
+    private final SupplyFacade supplyFacade;
 
     @Override
     public BillOfMaterialResponseDTO addMaterialToProduct(Long productId, BillOfMaterialRequestDTO bomDTO) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product with id " + productId + " not found"));
 
-        RawMaterial material = rawMaterialRepository.findById(bomDTO.getMaterialId()).orElseThrow(() -> new ResourceNotFoundException("Material with this id " + bomDTO.getMaterialId() + " not found"));
+        RawMaterialResponse material = supplyFacade.getMaterialById(bomDTO.getMaterialId());
 
         if (billOfMaterialRepository.existsByProductIdAndMaterialId(productId, bomDTO.getMaterialId())) {
             throw new DuplicateResourceException("This bill of material is already exist");
@@ -45,8 +41,10 @@ public class BillOfMaterialServiceImp implements BillOfMaterialService {
 //        BillOfMaterial bom  = billOfMaterialMapper.toEntity(bomDTO);
         BillOfMaterial bom = new BillOfMaterial();
         bom.setProduct(product);
-        bom.setMaterial(material);
+        bom.setMaterialId(material.getId());
         bom.setQuantity(bomDTO.getQuantity());
+        bom.setPriceAtOrder(new BigDecimal(material.getUnitCost()));
+
         log.info("Mapping bom from dto to entity: {} to {}", bomDTO, bom);
         BillOfMaterial savedBom = billOfMaterialRepository.save(bom);
         return billOfMaterialMapper.toResponseDTO(savedBom);

@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,7 +14,7 @@ public class ProductResponseDTO {
     private String name;
     private Integer productionTime;
     private Double cost;
-    private Double materialCost; // I will handle it after
-    private Double profitMargin; // I will handle it after
+    private BigDecimal materialCost; // I will handle it after
+    private BigDecimal profitMargin; // I will handle it after
     private Boolean hasBom;
 }

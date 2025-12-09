@@ -2,6 +2,8 @@ package net.ayman.supplychainx.production.dto.bom;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class BillOfMaterialResponseDTO {
     private Long id;
@@ -11,6 +13,6 @@ public class BillOfMaterialResponseDTO {
     private String productName;
     private String materialUnit;
     private Integer quantity;
-    private Double unitCost;
-    private Double totalCost;
+    private BigDecimal unitCost;
+    private BigDecimal totalCost;
 }

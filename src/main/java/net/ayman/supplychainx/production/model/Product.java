@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class Product {
     @Column(name = "production_time")
     private Integer productionTime;
     @Column(nullable = false)
-    private Double cost;
+    private BigDecimal cost;
     @Column
     private Integer stock = 0;
     @Column(name = "is_deleted")
@@ -67,23 +68,18 @@ public class Product {
         return productionOrders == null || productionOrders.isEmpty();
     }
 
-    public Double calculateMaterialCost() {
+    public BigDecimal calculateMaterialCost() {
         if (bills == null || bills.isEmpty()) {
-            return 0.0;
+            return BigDecimal.ZERO;
         }
 
         return bills.stream()
-                .mapToDouble(bill -> {
-                    if(bill.getMaterial() != null && bill.getMaterial().getUnitCost() != null) {
-                        return bill.getQuantity() * bill.getMaterial().getUnitCost();
-                    }
-                    return 0.0;
-                })
-                .sum();
+                .map(bill -> bill.getPriceAtOrder().multiply(new BigDecimal(bill.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public Double calculateProfitMargin() {
-        return cost - calculateMaterialCost();
+    public BigDecimal calculateProfitMargin() {
+        return cost.subtract(calculateMaterialCost());
     }
 
     public boolean hasBom() {

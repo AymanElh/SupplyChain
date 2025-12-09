@@ -2,10 +2,10 @@ package net.ayman.supplychainx.production.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import net.ayman.supplychainx.supply.model.RawMaterial;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,12 +20,18 @@ public class BillOfMaterial {
     private Long id;
     @Column
     private Integer quantity;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
-    @ManyToOne
-    @JoinColumn(name = "material_id")
-    private RawMaterial material;
+
+    // delete the relationship of material_id and replace with a simple reference id
+    @Column(name = "material_id", nullable = false)
+    private Long materialId;
+
+    // snapshot of the price of raw material on the bill of material order
+    @Column(name = "material_price", precision = 10, scale = 10)
+    private BigDecimal priceAtOrder;
 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
@@ -55,11 +61,11 @@ public class BillOfMaterial {
     }
 
     // Business logic
-    public Double calculateTotalCost() {
-        if(material == null || material.getUnitCost() == null) {
-            return 0.0;
+    public BigDecimal calculateTotalCost() {
+        if(priceAtOrder == null) {
+            return BigDecimal.ZERO;
         }
-        return quantity * material.getUnitCost();
+        return priceAtOrder.multiply(BigDecimal.valueOf(quantity));
     }
 
 }

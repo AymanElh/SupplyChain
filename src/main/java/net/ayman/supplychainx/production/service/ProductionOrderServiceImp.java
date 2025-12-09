@@ -13,8 +13,8 @@ import net.ayman.supplychainx.production.model.ProductionStatus;
 import net.ayman.supplychainx.production.repository.BillOfMaterialRepository;
 import net.ayman.supplychainx.production.repository.ProductRepository;
 import net.ayman.supplychainx.production.repository.ProductionOrderRepository;
-import net.ayman.supplychainx.supply.model.RawMaterial;
-import net.ayman.supplychainx.supply.repository.RawMaterialRepository;
+import net.ayman.supplychainx.supply.api.SupplyFacade;
+import net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,14 +32,14 @@ public class ProductionOrderServiceImp implements ProductionOrderService {
     private final ProductionOrderRepository productionOrderRepository;
     private final ProductRepository productRepository;
     private final BillOfMaterialRepository billOfMaterialRepository;
-    private final RawMaterialRepository rawMaterialRepository;
+    private final SupplyFacade supplyFacade;
 
-    public ProductionOrderServiceImp(ProductionOrderMapper productionOrderMapper, ProductionOrderRepository productionOrderRepository, ProductRepository productRepository, BillOfMaterialRepository billOfMaterialRepository, RawMaterialRepository rawMaterialRepository) {
+    public ProductionOrderServiceImp(ProductionOrderMapper productionOrderMapper, ProductionOrderRepository productionOrderRepository, ProductRepository productRepository, BillOfMaterialRepository billOfMaterialRepository, SupplyFacade supplyFacade) {
         this.productionOrderMapper = productionOrderMapper;
         this.productionOrderRepository = productionOrderRepository;
         this.productRepository = productRepository;
         this.billOfMaterialRepository = billOfMaterialRepository;
-        this.rawMaterialRepository = rawMaterialRepository;
+        this.supplyFacade = supplyFacade;
     }
 
     @Override
@@ -110,13 +110,17 @@ public class ProductionOrderServiceImp implements ProductionOrderService {
         List<BillOfMaterial> bills = billOfMaterialRepository.findByProductId(product.getId());
 
         for (BillOfMaterial bom : bills) {
-            RawMaterial material = bom.getMaterial();
             int requiredQuantity = bom.getQuantity() * order.getQuantity();
-            if (material.getStock() < requiredQuantity) {
+            RawMaterialResponse material = supplyFacade.getMaterialById(bom.getMaterialId());
+            
+            if (!supplyFacade.hasAvailableStock(bom.getMaterialId(), requiredQuantity)) {
                 throw new BusinessRuleException("Not enough stock for material: " + material.getName());
             }
-            material.setStock(material.getStock() - requiredQuantity);
-            rawMaterialRepository.save(material);
+        }
+        
+        for (BillOfMaterial bom : bills) {
+            int requiredQuantity = bom.getQuantity() * order.getQuantity();
+            supplyFacade.reduceStock(bom.getMaterialId(), requiredQuantity);
         }
 
         order.startProduction();

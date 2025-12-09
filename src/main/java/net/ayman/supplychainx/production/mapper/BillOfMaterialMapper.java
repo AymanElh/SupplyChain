@@ -9,16 +9,14 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface BillOfMaterialMapper {
 
-    @Mapping(source = "material.id", target = "materialId")
-    @Mapping(target = "materialName", source = "material.name")
+    @Mapping(target = "materialName", ignore = true)
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productName", source = "product.name")
-    @Mapping(target = "materialUnit", source = "material.unit")
-    @Mapping(target = "unitCost", source = "material.unitCost")
+    @Mapping(target = "unitCost", source = "priceAtOrder")
     @Mapping(target = "totalCost", expression = "java(bom.calculateTotalCost())")
     BillOfMaterialResponseDTO toResponseDTO(BillOfMaterial bom);
 
-    @Mapping(target = "material", ignore = true)
+    @Mapping(target = "materialId", ignore = true)
     @Mapping(target = "isDeleted", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
