@@ -2,6 +2,7 @@ package net.ayman.supplychainx.user.service;
 
 import net.ayman.supplychainx.common.exception.EmailAlreadyExistException;
 import net.ayman.supplychainx.common.exception.ResourceNotFoundException;
+import net.ayman.supplychainx.common.exception.UnauthorizedException;
 import net.ayman.supplychainx.user.dto.UserRequestDTO;
 import net.ayman.supplychainx.user.dto.UserResponseDTO;
 import net.ayman.supplychainx.user.dto.login.LoginRequestDTO;
@@ -9,17 +10,9 @@ import net.ayman.supplychainx.user.dto.login.LoginResponseDTO;
 import net.ayman.supplychainx.user.mapper.UserMapper;
 import net.ayman.supplychainx.user.model.User;
 import net.ayman.supplychainx.user.repository.UserRepository;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -81,19 +74,15 @@ public class UserService {
     public LoginResponseDTO login(LoginRequestDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new ResourceNotFoundException("User with this email not fount"));
 
-//        if(!dto.getPassword().equals(user.getPassword())) {
-//            throw new RuntimeException("Invalid credentials");
-//        }
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new UnauthorizedException("Invalid credentials");
         }
 
         LoginResponseDTO loginResponse = new LoginResponseDTO();
         loginResponse.setUserId(user.getId());
         loginResponse.setName(user.getName());
         loginResponse.setEmail(user.getEmail());
-        loginResponse.setPhone(user.getPhone());
         loginResponse.setRoleName(user.getRole().getName());
         return loginResponse;
     }

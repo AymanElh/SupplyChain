@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.ayman.supplychainx.common.security.JwtUtil;
 import net.ayman.supplychainx.user.dto.UserRequestDTO;
 import net.ayman.supplychainx.user.dto.UserResponseDTO;
 import net.ayman.supplychainx.user.dto.login.LoginRequestDTO;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @Slf4j
 @RestController
 @RequestMapping("/api/v1")
@@ -35,39 +35,30 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO) {
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 loginRequestDTO.getEmail(),
-                loginRequestDTO.getPassword()
-        );
-
+                loginRequestDTO.getPassword());
 
         Authentication authentication = authenticationManager.authenticate(auth);
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
-        SecurityContextHolder.setContext(context);
-
-        securityContextRepository.saveContext(context, request, response);
 
         User user = (User) authentication.getPrincipal();
+        String token = jwtUtil.generateToken(user);
 
         LoginResponseDTO loginResp = LoginResponseDTO.builder()
                 .userId(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
+                .type("Bearer")
+                .token(token)
                 .roleName(user.getRole().getName())
                 .build();
 
-//        LoginResponseDTO loginResp = userService.login(loginRequestDTO);
-//        log.debug("Login response: {}", loginResp);
-//        session.setAttribute("currentUser", loginResp);
-//        session.setAttribute("userId", loginResp.getUserId());
-//        session.setAttribute("userName", loginResp.getName());
-//        session.setAttribute("userEmail", loginResp.getEmail());
-//        session.setAttribute("userRole", loginResp.getRoleName());
+        log.debug("Login response: {}", loginResp);
         return ResponseEntity.ok(loginResp);
     }
 
@@ -76,9 +67,4 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userRequestDTO));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate();
-        return ResponseEntity.ok("Logout successfully");
-    }
 }

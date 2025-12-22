@@ -12,6 +12,7 @@ public class LoginResponseDTO {
     private Long userId;
     private String name;
     private String email;
-    private String phone;
+    private String token;
+    private String type = "Bearer";
     private String roleName;
 }

@@ -4,11 +4,12 @@ services:
     container_name: supply_app
     image: aymanelh/supplychainx-api
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/supply_db
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=mySecretKey123456789012345678901234567890123456789012345
     ports:
       - "8080:8080"
     networks:

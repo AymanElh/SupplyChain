@@ -21,3 +21,7 @@ springdoc:
   api-docs:
     path: /api-docs
   packages-to-scan: net.ayman.supplychainx
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
