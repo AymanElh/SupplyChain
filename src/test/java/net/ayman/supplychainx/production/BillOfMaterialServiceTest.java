@@ -42,7 +42,7 @@ class BillOfMaterialServiceTest {
     @Mock
     private ProductRepository productRepository;
     @Mock
-    private RawMaterialRepository rawMaterialRepository;
+    private net.ayman.supplychainx.supply.api.SupplyFacade supplyFacade;
 
     @InjectMocks
     private BillOfMaterialServiceImp billOfMaterialService;
@@ -72,7 +72,7 @@ class BillOfMaterialServiceTest {
         billOfMaterial = new BillOfMaterial();
         billOfMaterial.setId(BOM_ID);
         billOfMaterial.setProduct(product);
-        billOfMaterial.setMaterial(rawMaterial);
+        billOfMaterial.setMaterialId(MATERIAL_ID);
         billOfMaterial.setQuantity(QUANTITY);
 
         requestDTO = new BillOfMaterialRequestDTO();
@@ -85,7 +85,7 @@ class BillOfMaterialServiceTest {
         responseDTO.setMaterialId(MATERIAL_ID);
         responseDTO.setQuantity(QUANTITY);
         responseDTO.setMaterialName("LCD Screen");
-        responseDTO.setUnitCost(85.00);
+        responseDTO.setUnitCost(java.math.BigDecimal.valueOf(85.00));
     }
 
     @Nested
@@ -95,8 +95,12 @@ class BillOfMaterialServiceTest {
         @Test
         @DisplayName("Should add material to product successfully")
         void shouldAddMaterialToProduct() {
+            net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse materialResponse = 
+                new net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse(
+                    MATERIAL_ID, "LCD Screen", 100, 10, "pcs", 85.00, false);
+            
             when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
-            when(rawMaterialRepository.findById(MATERIAL_ID)).thenReturn(Optional.of(rawMaterial));
+            when(supplyFacade.getMaterialById(MATERIAL_ID)).thenReturn(materialResponse);
             when(billOfMaterialRepository.existsByProductIdAndMaterialId(PRODUCT_ID, MATERIAL_ID))
                     .thenReturn(false);
             when(billOfMaterialRepository.save(any(BillOfMaterial.class))).thenReturn(billOfMaterial);
@@ -111,7 +115,7 @@ class BillOfMaterialServiceTest {
             assertThat(result.getQuantity()).isEqualTo(QUANTITY);
 
             verify(productRepository, times(1)).findById(PRODUCT_ID);
-            verify(rawMaterialRepository, times(1)).findById(MATERIAL_ID);
+            verify(supplyFacade, times(1)).getMaterialById(MATERIAL_ID);
             verify(billOfMaterialRepository, times(1)).existsByProductIdAndMaterialId(PRODUCT_ID, MATERIAL_ID);
             verify(billOfMaterialRepository, times(1)).save(any(BillOfMaterial.class));
             verify(billOfMaterialMapper, times(1)).toResponseDTO(billOfMaterial);
@@ -121,7 +125,7 @@ class BillOfMaterialServiceTest {
             BillOfMaterial savedBom = bomCaptor.getValue();
             
             assertThat(savedBom.getProduct()).isEqualTo(product);
-            assertThat(savedBom.getMaterial()).isEqualTo(rawMaterial);
+            assertThat(savedBom.getMaterialId()).isEqualTo(MATERIAL_ID);
             assertThat(savedBom.getQuantity()).isEqualTo(QUANTITY);
         }
 
@@ -135,7 +139,7 @@ class BillOfMaterialServiceTest {
                     .hasMessageContaining("Product with id " + PRODUCT_ID + " not found");
 
             verify(productRepository, times(1)).findById(PRODUCT_ID);
-            verify(rawMaterialRepository, never()).findById(any());
+            verify(supplyFacade, never()).getMaterialById(any());
             verify(billOfMaterialRepository, never()).save(any());
         }
 
@@ -143,22 +147,27 @@ class BillOfMaterialServiceTest {
         @DisplayName("Should throw ResourceNotFoundException when material not found")
         void shouldThrowExceptionWhenMaterialNotFound() {
             when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
-            when(rawMaterialRepository.findById(MATERIAL_ID)).thenReturn(Optional.empty());
+            when(supplyFacade.getMaterialById(MATERIAL_ID))
+                .thenThrow(new ResourceNotFoundException("Raw material with id " + MATERIAL_ID + " not found"));
 
             assertThatThrownBy(() -> billOfMaterialService.addMaterialToProduct(PRODUCT_ID, requestDTO))
                     .isInstanceOf(ResourceNotFoundException.class)
-                    .hasMessageContaining("Material with this id " + MATERIAL_ID + " not found");
+                    .hasMessageContaining("Raw material with id " + MATERIAL_ID + " not found");
 
             verify(productRepository, times(1)).findById(PRODUCT_ID);
-            verify(rawMaterialRepository, times(1)).findById(MATERIAL_ID);
+            verify(supplyFacade, times(1)).getMaterialById(MATERIAL_ID);
             verify(billOfMaterialRepository, never()).save(any());
         }
 
         @Test
         @DisplayName("Should throw DuplicateResourceException when bill of material already exists")
         void shouldThrowExceptionWhenBillOfMaterialAlreadyExists() {
+            net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse materialResponse = 
+                new net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse(
+                    MATERIAL_ID, "LCD Screen", 100, 10, "pcs", 85.00, false);
+            
             when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
-            when(rawMaterialRepository.findById(MATERIAL_ID)).thenReturn(Optional.of(rawMaterial));
+            when(supplyFacade.getMaterialById(MATERIAL_ID)).thenReturn(materialResponse);
             when(billOfMaterialRepository.existsByProductIdAndMaterialId(PRODUCT_ID, MATERIAL_ID))
                     .thenReturn(true);
 
@@ -167,7 +176,7 @@ class BillOfMaterialServiceTest {
                     .hasMessageContaining("This bill of material is already exist");
 
             verify(productRepository, times(1)).findById(PRODUCT_ID);
-            verify(rawMaterialRepository, times(1)).findById(MATERIAL_ID);
+            verify(supplyFacade, times(1)).getMaterialById(MATERIAL_ID);
             verify(billOfMaterialRepository, times(1)).existsByProductIdAndMaterialId(PRODUCT_ID, MATERIAL_ID);
             verify(billOfMaterialRepository, never()).save(any());
         }
@@ -188,7 +197,7 @@ class BillOfMaterialServiceTest {
             BillOfMaterial bom2 = new BillOfMaterial();
             bom2.setId(2L);
             bom2.setProduct(product);
-            bom2.setMaterial(material2);
+            bom2.setMaterialId(2L);
             bom2.setQuantity(3);
 
             BillOfMaterialResponseDTO responseDTO2 = new BillOfMaterialResponseDTO();
@@ -241,7 +250,7 @@ class BillOfMaterialServiceTest {
             BillOfMaterial updatedBom = new BillOfMaterial();
             updatedBom.setId(BOM_ID);
             updatedBom.setProduct(product);
-            updatedBom.setMaterial(rawMaterial);
+            updatedBom.setMaterialId(MATERIAL_ID);
             updatedBom.setQuantity(newQuantity);
 
             BillOfMaterialResponseDTO updatedResponseDTO = new BillOfMaterialResponseDTO();

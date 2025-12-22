@@ -37,7 +37,7 @@ class ProductionOrderServiceTest {
     @Mock private ProductionOrderRepository orderRepository;
     @Mock private ProductRepository productRepository;
     @Mock private BillOfMaterialRepository bomRepository;
-    @Mock private RawMaterialRepository rawMaterialRepository;
+    @Mock private net.ayman.supplychainx.supply.api.SupplyFacade supplyFacade;
     @Mock private ProductionOrderMapper orderMapper;
 
     @InjectMocks
@@ -77,13 +77,13 @@ class ProductionOrderServiceTest {
         bill1 = new BillOfMaterial();
         bill1.setId(1L);
         bill1.setProduct(product);
-        bill1.setMaterial(material1);
+        bill1.setMaterialId(material1.getId());
         bill1.setQuantity(5); // Need 5 kg plastic per laptop
 
         bill2 = new BillOfMaterial();
         bill2.setId(2L);
         bill2.setProduct(product);
-        bill2.setMaterial(material2);
+        bill2.setMaterialId(material2.getId());
         bill2.setQuantity(1);
 
         product.setBills(Arrays.asList(bill1, bill2));
@@ -143,14 +143,22 @@ class ProductionOrderServiceTest {
         @Test
         @DisplayName("Should start production successfully and update material stock and order status")
         void shouldStartProduction() {
+            net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse materialResponse1 = 
+                new net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse(
+                    1L, "Plastic Resin", 500, 50, "kg", 15.50, false);
+            
+            net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse materialResponse2 = 
+                new net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse(
+                    2L, "LCD Screen", 100, 10, "pcs", 85.00, false);
 
             when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
             when(bomRepository.findByProductId(1L)).thenReturn(Arrays.asList(bill1, bill2));
+            when(supplyFacade.getMaterialById(1L)).thenReturn(materialResponse1);
+            when(supplyFacade.getMaterialById(2L)).thenReturn(materialResponse2);
+            when(supplyFacade.hasAvailableStock(1L, 50)).thenReturn(true);
+            when(supplyFacade.hasAvailableStock(2L, 10)).thenReturn(true);
             when(orderRepository.save(any(ProductionOrder.class))).thenReturn(order);
             when(orderMapper.toResponseDTO(any(ProductionOrder.class))).thenReturn(orderResponse);
-
-            int material1InitialStock = material1.getStock(); // 500
-            int material2InitialStock = material2.getStock(); // 100
 
             // ========== WHEN ==========
             ProductionOrderResponseDTO result = orderService.startProduction(1L);
@@ -158,11 +166,13 @@ class ProductionOrderServiceTest {
             // ========== THEN ==========
             assertThat(result).isNotNull();
 
-            // Verify material stock was reduced
-            // For 10 laptops: need 10 × 5 = 50 kg plastic
-            assertThat(material1.getStock()).isEqualTo(material1InitialStock - 50);
-            // For 10 laptops: need 10 × 1 = 10 screens
-            assertThat(material2.getStock()).isEqualTo(material2InitialStock - 10);
+            // Verify facade methods were called
+            verify(supplyFacade, times(1)).getMaterialById(1L);
+            verify(supplyFacade, times(1)).getMaterialById(2L);
+            verify(supplyFacade, times(1)).hasAvailableStock(1L, 50);
+            verify(supplyFacade, times(1)).hasAvailableStock(2L, 10);
+            verify(supplyFacade, times(1)).reduceStock(1L, 50);
+            verify(supplyFacade, times(1)).reduceStock(2L, 10);
 
             // Verify order status changed
             verify(orderRepository, times(1)).save(any(ProductionOrder.class));

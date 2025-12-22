@@ -51,7 +51,7 @@ class CustomerOrderServiceTest {
     @Mock
     private AddressRepository addressRepository;
     @Mock
-    private ProductRepository productRepository;
+    private net.ayman.supplychainx.production.api.ProductFacade productFacade;
 
     @InjectMocks
     private CustomerOrderServiceImp customerOrderService;
@@ -138,9 +138,14 @@ class CustomerOrderServiceTest {
         @Test
         @DisplayName("Should create order successfully")
         void shouldCreateOrder() {
+            net.ayman.supplychainx.production.dto.product.ProductResponseDTO productDTO = 
+                new net.ayman.supplychainx.production.dto.product.ProductResponseDTO(
+                    PRODUCT_ID, "Gaming Laptop", 8, 100.0, null, null, true);
+            
             when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
             when(addressRepository.findById(ADDRESS_ID)).thenReturn(Optional.of(address));
-            when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+            when(productFacade.getProductById(PRODUCT_ID)).thenReturn(productDTO);
+            when(productFacade.hasAvailableStock(PRODUCT_ID, QUANTITY)).thenReturn(true);
             when(customerOrderRepository.save(any(CustomerOrder.class))).thenReturn(order);
             when(customerOrderMapper.toResponseDTO(any(CustomerOrder.class))).thenReturn(responseDTO);
 
@@ -152,7 +157,9 @@ class CustomerOrderServiceTest {
 
             verify(customerRepository, times(1)).findById(CUSTOMER_ID);
             verify(addressRepository, times(1)).findById(ADDRESS_ID);
-            verify(productRepository, times(2)).findById(PRODUCT_ID);
+            verify(productFacade, times(1)).getProductById(PRODUCT_ID);
+            verify(productFacade, times(1)).hasAvailableStock(PRODUCT_ID, QUANTITY);
+            verify(productFacade, times(1)).reserveStock(PRODUCT_ID, QUANTITY);
             verify(customerOrderRepository, times(1)).save(any(CustomerOrder.class));
             verify(customerOrderMapper, times(1)).toResponseDTO(any(CustomerOrder.class));
 
@@ -237,11 +244,14 @@ class CustomerOrderServiceTest {
         @Test
         @DisplayName("Should throw BusinessRuleException when product has insufficient stock")
         void shouldThrowExceptionWhenInsufficientStock() {
-            product.setStock(2);
+            net.ayman.supplychainx.production.dto.product.ProductResponseDTO productDTO = 
+                new net.ayman.supplychainx.production.dto.product.ProductResponseDTO(
+                    PRODUCT_ID, "Gaming Laptop", 8, 100.0, null, null, true);
 
             when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
             when(addressRepository.findById(ADDRESS_ID)).thenReturn(Optional.of(address));
-            when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+            when(productFacade.getProductById(PRODUCT_ID)).thenReturn(productDTO);
+            when(productFacade.hasAvailableStock(PRODUCT_ID, QUANTITY)).thenReturn(false);
 
             assertThatThrownBy(() -> customerOrderService.createOrder(requestDTO))
                     .isInstanceOf(BusinessRuleException.class)
@@ -253,17 +263,20 @@ class CustomerOrderServiceTest {
         @Test
         @DisplayName("Should reduce product stock when creating order")
         void shouldReduceProductStockWhenCreatingOrder() {
-            int initialStock = product.getStock();
+            net.ayman.supplychainx.production.dto.product.ProductResponseDTO productDTO = 
+                new net.ayman.supplychainx.production.dto.product.ProductResponseDTO(
+                    PRODUCT_ID, "Gaming Laptop", 8, 100.0, null, null, true);
 
             when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
             when(addressRepository.findById(ADDRESS_ID)).thenReturn(Optional.of(address));
-            when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+            when(productFacade.getProductById(PRODUCT_ID)).thenReturn(productDTO);
+            when(productFacade.hasAvailableStock(PRODUCT_ID, QUANTITY)).thenReturn(true);
             when(customerOrderRepository.save(any(CustomerOrder.class))).thenReturn(order);
             when(customerOrderMapper.toResponseDTO(any(CustomerOrder.class))).thenReturn(responseDTO);
 
             customerOrderService.createOrder(requestDTO);
 
-            assertThat(product.getStock()).isEqualTo(initialStock - QUANTITY);
+            verify(productFacade, times(1)).reserveStock(PRODUCT_ID, QUANTITY);
         }
     }
 
@@ -385,12 +398,12 @@ class CustomerOrderServiceTest {
             order.setStatus(OrderStatus.CANCELLED);
 
             when(customerOrderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-            when(productRepository.save(any(Product.class))).thenReturn(product);
             doNothing().when(customerOrderRepository).delete(order);
 
             customerOrderService.deleteOrder(ORDER_ID);
 
             verify(customerOrderRepository, times(1)).findById(ORDER_ID);
+            verify(productFacade, times(1)).releaseStock(PRODUCT_ID, QUANTITY);
             verify(customerOrderRepository, times(1)).delete(order);
         }
 
@@ -412,17 +425,14 @@ class CustomerOrderServiceTest {
         @Test
         @DisplayName("Should restore product stock when deleting order")
         void shouldRestoreProductStockWhenDeletingOrder() {
-            int initialStock = product.getStock();
             order.setStatus(OrderStatus.CANCELLED);
 
             when(customerOrderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-            when(productRepository.save(any(Product.class))).thenReturn(product);
             doNothing().when(customerOrderRepository).delete(order);
 
             customerOrderService.deleteOrder(ORDER_ID);
 
-            assertThat(product.getStock()).isEqualTo(initialStock + QUANTITY);
-            verify(productRepository, times(1)).save(product);
+            verify(productFacade, times(1)).releaseStock(PRODUCT_ID, QUANTITY);
         }
 
         @Test
