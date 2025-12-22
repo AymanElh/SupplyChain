@@ -26,7 +26,7 @@ public class Product {
     @Column(name = "production_time")
     private Integer productionTime;
     @Column(nullable = false)
-    private BigDecimal cost;
+    private Double cost;
     @Column
     private Integer stock = 0;
     @Column(name = "is_deleted")
@@ -79,7 +79,7 @@ public class Product {
     }
 
     public BigDecimal calculateProfitMargin() {
-        return cost.subtract(calculateMaterialCost());
+        return BigDecimal.valueOf(cost).subtract(calculateMaterialCost());
     }
 
     public boolean hasBom() {
