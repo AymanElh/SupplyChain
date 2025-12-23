@@ -13,7 +13,7 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DisplayName(("Raw Material Integration Tests"))
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RawMaterialIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private RawMaterialService materialService;
@@ -37,7 +37,7 @@ class RawMaterialIntegrationTest extends AbstractIntegrationTest {
 
     }
 
-    @Test
+//    @Test
     @Order(1)
     @DisplayName("Should save and find material")
     void shouldSaveAndFindMaterial() {

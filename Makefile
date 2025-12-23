@@ -1,0 +1,43 @@
+.PHONY: help build test run docker-up docker-down clean
+
+help:
+	@echo "Available commands:"
+	@echo "  make build        - Build the project using Maven"
+	@echo "  make test         - Run tests with coverage report"
+	@echo "  make run          - Run the application locally"
+	@echo "  make up    - Start application with Docker Compose"
+	@echo "  make cleardown  - Stop Docker containers"
+	@echo "  make db-container - Getting inside database container"
+	@echo "  make clean        - Clean build artifacts"
+
+build:
+	@echo "Building the project..."
+	mvn clean package -DskipTests
+
+run:
+	@echo "Starting the application..."
+	mvn spring-boot:run
+
+docker-build:
+	@echo "Starting Docker containers..."
+	docker-compose up --build -d
+	@echo "Application is starting..."
+	@echo "Use 'make logs' to view logs"
+
+up:
+	@echo "Start docker container"
+	docker compose up -d
+	@echo "Container are run"
+
+db-container:
+	@echo "Getting inside database container ..."
+	docker exec -it supply_postgres bash
+
+down:
+	@echo "Stopping Docker containers..."
+	docker compose down
+
+clean:
+	@echo "Cleaning build artifacts..."
+	mvn clean
+	docker compose down -v

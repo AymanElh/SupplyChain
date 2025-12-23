@@ -49,7 +49,7 @@ public class DriverController {
 
     @RequiredRole({"SUPERVISEUR_LIVRAISONS"})
     @DeleteMapping("/{id}")
-    public void deleteDriver(Long id) {
+    public void deleteDriver(@PathVariable("id") Long id) {
         driverService.deleteDriver(id);
     }
 }
