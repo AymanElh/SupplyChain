@@ -21,7 +21,7 @@ RUN groupadd -r spring && useradd -r -g spring spring
 
 COPY --from=builder /app/target/SupplyChainX-${APP_VERSION}.jar /app/app.jar
 
-RUN chown -R spring:spring /app
+RUN mkdir -p /app/logs && chown -R spring:spring /app
 
 USER spring
 
