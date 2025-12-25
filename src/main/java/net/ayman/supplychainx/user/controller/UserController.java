@@ -2,6 +2,7 @@ package net.ayman.supplychainx.user.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import net.ayman.supplychainx.user.dto.UserRequestDTO;
 import net.ayman.supplychainx.user.dto.UserResponseDTO;
 import net.ayman.supplychainx.user.service.UserService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 @Tag(name = "User management", description = "Operation related to user management")
@@ -27,6 +29,7 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasRole('ROLE_admin')")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        log.info("Getting all users ...");
         return ResponseEntity.ok(userService.getAll());
     }
 

@@ -29,6 +29,23 @@ up:
 	docker compose up -d
 	@echo "Container are run"
 
+up-app:
+	@echo "Start app containers with database"
+	docker compose up app db pgadmin -d
+
+up-elk:
+	@echo "Start elk containers ..."
+	docker compose up logstash elasticsearch kibana -d
+
+up-sonar:
+	@echo "Start sonarqube container for code quality and test"
+	docker compose up sonarqube sonarqube-db -d
+	@echo "Containers are run"
+
+app-container:
+	@echo "Get into inside spring boot container..."
+	docker exec -it supply_app bash
+
 db-container:
 	@echo "Getting inside database container ..."
 	docker exec -it supply_postgres bash
