@@ -1,4 +1,12 @@
 spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -6,10 +14,15 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
 
   test:
     database:
       replace: none
+
+jwt:
+  secret: testSecretKeyForTestingPurposesOnly1234567890123456789012345678901234567890
+  expiration: 86400000
 
 logging:
   level:

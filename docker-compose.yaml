@@ -130,6 +130,7 @@ services:
       - "5000:5000"
     networks:
       - app-network
+      - elk-network
     depends_on:
       - elasticsearch
 

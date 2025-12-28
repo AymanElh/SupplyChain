@@ -1,20 +1,23 @@
 package net.ayman.supplychainx.supply;
 
-import net.ayman.supplychainx.AbstractIntegrationTest;
 import net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialRequest;
 import net.ayman.supplychainx.supply.model.RawMaterial;
 import net.ayman.supplychainx.supply.repository.RawMaterialRepository;
 import net.ayman.supplychainx.supply.service.RawMaterialService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+@SpringBootTest
+@ActiveProfiles("test")
 @DisplayName(("Raw Material Integration Tests"))
-//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class RawMaterialIntegrationTest extends AbstractIntegrationTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class RawMaterialIntegrationTest {
     @Autowired
     private RawMaterialService materialService;
     @Autowired
@@ -37,7 +40,7 @@ class RawMaterialIntegrationTest extends AbstractIntegrationTest {
 
     }
 
-//    @Test
+    @Test
     @Order(1)
     @DisplayName("Should save and find material")
     void shouldSaveAndFindMaterial() {
