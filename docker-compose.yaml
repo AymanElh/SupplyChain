@@ -108,6 +108,7 @@ services:
       - "9200:9200"
     networks:
       - app-network
+    restart: unless-stopped
 
 
   kibana:
@@ -119,6 +120,7 @@ services:
       - "5601:5601"
     networks:
       - app-network
+    restart: unless-stopped
 
 
   logstash:
@@ -133,6 +135,43 @@ services:
       - elk-network
     depends_on:
       - elasticsearch
+    restart: unless-stopped
+
+  # Auth service
+  keycloak:
+    image: keycloak/keycloak:21.1.1
+    container_name: keycloak
+    command: start-dev
+    depends_on:
+      - keycloak-db
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+    ports:
+      - "8081:8080"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  keycloak-db:
+    image: postgres:15
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+
+
 
 networks:
   app-network:
@@ -151,3 +190,4 @@ volumes:
   postgresql_data:
   es_data:
   app-logs:
+  keycloak_data:

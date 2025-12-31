@@ -12,8 +12,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 
 @Slf4j
 @RestController
@@ -26,8 +28,8 @@ public class SupplierController {
         this.supplierService = supplierService;
     }
 
-    @RequiredRole({"ADMIN", "SUPERVISEUR_LOGISTIQUE"})
     @GetMapping
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<Page<SupplierResponseDTO>> getAllSuppliers(
             int page,
             int size,

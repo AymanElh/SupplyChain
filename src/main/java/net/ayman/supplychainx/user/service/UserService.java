@@ -10,6 +10,7 @@ import net.ayman.supplychainx.user.dto.login.LoginResponseDTO;
 import net.ayman.supplychainx.user.mapper.UserMapper;
 import net.ayman.supplychainx.user.model.User;
 import net.ayman.supplychainx.user.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
