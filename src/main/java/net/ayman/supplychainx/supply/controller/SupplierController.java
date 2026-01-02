@@ -44,25 +44,25 @@ public class SupplierController {
         return ResponseEntity.ok(supplierService.getSupplierById(id));
     }
 
-    @RequiredRole({"ADMIN", "RESPONSABLE_ACHATS"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE_ACHATS')")
     @GetMapping("/search")
     public ResponseEntity<SupplierResponseDTO> searchByName(@RequestParam("name") String name) {
         return ResponseEntity.status(HttpStatus.OK).body(supplierService.searchByName(name));
     }
 
-    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
     @PostMapping
     public ResponseEntity<SupplierResponseDTO> createSupplier(@Validated(OnCreate.class) @RequestBody SupplierRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(supplierService.createSupplier(dto));
     }
 
-    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
     @PutMapping("/{id}")
     public ResponseEntity<SupplierResponseDTO> updateSupplier(@PathVariable("id") Long id, @Valid @RequestBody SupplierRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.OK).body(supplierService.updateSupplier(id, dto));
     }
 
-    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSupplier(@PathVariable("id") Long id) {
         supplierService.deleteSupplier(id);

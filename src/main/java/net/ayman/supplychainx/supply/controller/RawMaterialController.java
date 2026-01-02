@@ -1,7 +1,6 @@
 package net.ayman.supplychainx.supply.controller;
 
 import jakarta.validation.Valid;
-import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialRequest;
 import net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse;
 import net.ayman.supplychainx.supply.service.RawMaterialService;
@@ -10,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -23,7 +23,7 @@ public class RawMaterialController {
         this.rawMaterialService = rawMaterialService;
     }
 
-    @RequiredRole({"ADMIN"})
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<Page<RawMaterialResponse>> getAllMaterials(
             int page,
@@ -38,19 +38,19 @@ public class RawMaterialController {
         return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.getById(id));
     }
 
-    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
     @PostMapping
     public ResponseEntity<RawMaterialResponse> createMaterial(@Valid @RequestBody RawMaterialRequest materialDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rawMaterialService.createNewMaterial(materialDto));
     }
 
-    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
     @PutMapping("/{id}")
     public ResponseEntity<RawMaterialResponse> updateMaterial(@PathVariable Long id, @Valid @RequestBody RawMaterialRequest materialRequest) {
         return ResponseEntity.ok(rawMaterialService.updateMaterial(id, materialRequest));
     }
 
-    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMaterial(@PathVariable("id") Long id) {
         rawMaterialService.deleteMaterial(id);
