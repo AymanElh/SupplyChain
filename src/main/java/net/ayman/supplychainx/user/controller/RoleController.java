@@ -1,6 +1,5 @@
 package net.ayman.supplychainx.user.controller;
 
-import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.user.model.Role;
 import net.ayman.supplychainx.user.service.RoleService;
 import org.springframework.http.HttpStatus;

@@ -2,7 +2,6 @@ package net.ayman.supplychainx.supply.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.supply.dto.supplier.SupplierRequestDTO;
 import net.ayman.supplychainx.supply.dto.supplier.SupplierResponseDTO;
 import net.ayman.supplychainx.supply.service.SupplierService;
