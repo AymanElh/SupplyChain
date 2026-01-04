@@ -5,9 +5,9 @@ import net.ayman.supplychainx.user.service.RoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -22,8 +22,7 @@ public class RoleController {
 
     @GetMapping
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<?> getAll() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<List<Role>> getAll() {
         return new ResponseEntity<>(roleService.getAllRoles(), HttpStatus.OK);
     }
 
