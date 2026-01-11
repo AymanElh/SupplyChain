@@ -1,5 +1,4 @@
 package net.ayman.supplychainx.supply.controller;
-
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.ayman.supplychainx.common.security.RequiredRole;
@@ -10,6 +9,7 @@ import net.ayman.supplychainx.validation.OnCreate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -33,7 +33,7 @@ public class SupplierController {
             int size,
             String sortBy
     ) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         return ResponseEntity.ok(supplierService.getAll(pageable));
     }
 
