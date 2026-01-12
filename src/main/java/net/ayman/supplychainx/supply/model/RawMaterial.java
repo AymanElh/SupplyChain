@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "raw_materials")
 @SQLDelete(sql = "UPDATE raw_materials SET is_deleted = true, deleted_at = NOW()")
+@SQLRestriction("is_deleted = false")
 @Data @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -56,6 +58,7 @@ public class RawMaterial {
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.isDeleted = false;
     }
 
     @PreUpdate
