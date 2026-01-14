@@ -16,6 +16,8 @@ SupplyChainX is a modern enterprise application designed to manage and optimize 
 - **RESTful API**: Well-documented REST API with OpenAPI/Swagger integration
 - **Monitoring**: Built-in actuator endpoints for application health and metrics
 - **Code Quality**: Integrated SonarQube for code quality analysis
+- **Monitoring & Logging**: ELK Stack (Elasticsearch, Logstash, Kibana) for centralized logging and monitoring
+- **Authentication & Authorization**: Keycloak integration for enterprise-grade identity and access management
 - **Containerization**: Docker and Docker Compose support for easy deployment
 
 ## 🛠️ Technology Stack
@@ -30,6 +32,8 @@ SupplyChainX is a modern enterprise application designed to manage and optimize 
 - **Testing**: JUnit 5, Testcontainers
 - **Code Coverage**: JaCoCo
 - **Code Quality**: SonarQube
+- **Monitoring**: ELK Stack (Elasticsearch 7.17.22, Logstash 7.17.22, Kibana 7.17.22)
+- **Authentication**: Keycloak 21.1.1
 - **Build Tool**: Maven
 - **Containerization**: Docker & Docker Compose
 
@@ -62,6 +66,10 @@ This will start:
 - **PostgreSQL Database**: localhost:5432
 - **PgAdmin**: http://localhost:5050
 - **SonarQube**: http://localhost:9001
+- **Elasticsearch**: http://localhost:9200
+- **Kibana**: http://localhost:5601
+- **Logstash**: localhost:5000
+- **Keycloak**: http://localhost:8081
 
 ### Running Locally
 
@@ -155,6 +163,79 @@ The coverage report will be generated at: `target/site/jacoco/index.html`
    - Username: admin
    - Password: root
 
+## 📊 Monitoring & Logging
+
+### ELK Stack Integration
+
+The application uses the ELK (Elasticsearch, Logstash, Kibana) stack for centralized logging and monitoring.
+
+#### Accessing Kibana
+
+1. Access Kibana at http://localhost:5601
+2. Create an index pattern:
+   - Go to Management → Stack Management → Index Patterns
+   - Create index pattern: `supplychain-logs-*`
+   - Select `@timestamp` as the time field
+3. View logs in Discover section
+
+#### Log Configuration
+
+- Logs are sent to Logstash on port 5000 via TCP
+- Logstash processes and forwards logs to Elasticsearch
+- Logs are indexed with pattern: `supplychain-logs-YYYY.MM.dd`
+- Elasticsearch stores and indexes all application logs
+- Kibana provides visualization and search capabilities
+
+#### Logstash Configuration
+
+The Logstash pipeline is configured in `logstash.conf`:
+- **Input**: TCP on port 5000 with JSON lines codec
+- **Filter**: Timestamp parsing
+- **Output**: Elasticsearch with daily indices
+
+## 🔐 Authentication with Keycloak
+
+### Keycloak Setup
+
+The application integrates Keycloak for identity and access management.
+
+#### Accessing Keycloak Admin Console
+
+1. Access Keycloak at http://localhost:8081
+2. Login with default credentials:
+   - Username: admin
+   - Password: admin
+
+#### Initial Configuration
+
+1. **Create a Realm**:
+   - Navigate to the realm dropdown (top left)
+   - Click "Add realm"
+   - Create a realm for your application (e.g., "supplychainx")
+
+2. **Create a Client**:
+   - Go to Clients → Create
+   - Set Client ID (e.g., "supplychainx-client")
+   - Configure client settings:
+     - Client Protocol: openid-connect
+     - Access Type: confidential
+     - Valid Redirect URIs: http://localhost:8080/*
+     - Web Origins: http://localhost:8080
+
+3. **Create Users**:
+   - Navigate to Users → Add user
+   - Set username and other details
+   - Go to Credentials tab to set password
+   - Assign appropriate roles
+
+#### Keycloak Database
+
+Keycloak uses a dedicated PostgreSQL database:
+- **Database**: keycloak
+- **Username**: keycloak
+- **Password**: keycloak
+- **Port**: 5433 (mapped to container port 5432)
+
 ## 📁 Project Structure
 
 ```
@@ -177,13 +258,20 @@ SupplyChainX/
 │   └── test/                        # Test classes
 ├── docker-compose.yaml              # Docker Compose configuration
 ├── Dockerfile                       # Application Dockerfile
+├── logstash.conf                    # Logstash pipeline configuration
 ├── pom.xml                         # Maven configuration
 └── README.md
 ```
 
 ## 🔐 Security
 
-The application implements role-based access control using custom `@RequiredRole` annotation. Ensure proper roles are assigned to users for accessing protected endpoints.
+The application implements multiple layers of security:
+
+- **Role-Based Access Control**: Custom `@RequiredRole` annotation for endpoint protection
+- **Keycloak Integration**: Enterprise-grade identity and access management with OAuth 2.0/OpenID Connect
+- **Secure Configuration**: Environment-based configuration for sensitive data
+
+Ensure proper roles are assigned to users in Keycloak for accessing protected endpoints.
 
 ## 🤝 Contributing
 

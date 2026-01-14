@@ -1,7 +1,6 @@
 package net.ayman.supplychainx.supply.controller;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.supply.dto.supplier.SupplierRequestDTO;
 import net.ayman.supplychainx.supply.dto.supplier.SupplierResponseDTO;
 import net.ayman.supplychainx.supply.service.SupplierService;
@@ -12,8 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 
 @Slf4j
 @RestController
@@ -26,8 +27,8 @@ public class SupplierController {
         this.supplierService = supplierService;
     }
 
-    @RequiredRole({"ADMIN", "SUPERVISEUR_LOGISTIQUE"})
     @GetMapping
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<Page<SupplierResponseDTO>> getAllSuppliers(
             int page,
             int size,
@@ -42,25 +43,25 @@ public class SupplierController {
         return ResponseEntity.ok(supplierService.getSupplierById(id));
     }
 
-    @RequiredRole({"ADMIN", "RESPONSABLE_ACHATS"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE_ACHATS')")
     @GetMapping("/search")
     public ResponseEntity<SupplierResponseDTO> searchByName(@RequestParam("name") String name) {
         return ResponseEntity.status(HttpStatus.OK).body(supplierService.searchByName(name));
     }
 
-    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
     @PostMapping
     public ResponseEntity<SupplierResponseDTO> createSupplier(@Validated(OnCreate.class) @RequestBody SupplierRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(supplierService.createSupplier(dto));
     }
 
-    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
     @PutMapping("/{id}")
     public ResponseEntity<SupplierResponseDTO> updateSupplier(@PathVariable("id") Long id, @Valid @RequestBody SupplierRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.OK).body(supplierService.updateSupplier(id, dto));
     }
 
-    @RequiredRole({"ADMIN", "GESTIONNAIRE_APPROVISIONNEMENT"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSupplier(@PathVariable("id") Long id) {
         supplierService.deleteSupplier(id);

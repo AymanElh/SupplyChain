@@ -2,7 +2,6 @@ package net.ayman.supplychainx.production.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import net.ayman.supplychainx.common.security.RequiredRole;
 import net.ayman.supplychainx.production.dto.product.ProductRequestDTO;
 import net.ayman.supplychainx.production.dto.product.ProductResponseDTO;
 import net.ayman.supplychainx.production.service.ProductService;
@@ -11,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -24,13 +24,13 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @RequiredRole({"CHEF_PRODUCTION"})
+    @PreAuthorize("hasRole('CHEF_PRODUCTION')")
     @PostMapping
     public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDTO productRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productRequestDTO));
     }
 
-    @RequiredRole({"SUPERVISEUR_PRODUCTION"})
+    @PreAuthorize("hasRole('SUPERVISEUR_PRODUCTION')")
     @GetMapping
     public ResponseEntity<Page<ProductResponseDTO>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
@@ -42,19 +42,19 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAll(pageable));
     }
 
-    @RequiredRole({"SUPERVISEUR_PRODUCTION"})
+    @PreAuthorize("hasRole('SUPERVISEUR_PRODUCTION')")
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> getById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(productService.getById(id));
     }
 
-    @RequiredRole({"CHEF_PRODUCTION"})
+    @PreAuthorize("hasRole('CHEF_PRODUCTION')")
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody ProductRequestDTO dto) {
         return ResponseEntity.ok(productService.update(id, dto));
     }
 
-    @RequiredRole({"CHEF_PRODUCTION"})
+    @PreAuthorize("hasRole('CHEF_PRODUCTION')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
         productService.deleteProduct(id);

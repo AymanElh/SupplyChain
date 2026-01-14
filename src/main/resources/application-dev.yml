@@ -10,6 +10,16 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/supplychain
+          jwk-set-uri: http://localhost:8081/realms/supplychain/protocol/openid-connect/certs
+
+  main:
+    allow-bean-definition-overriding: true
+
 springdoc:
   api-docs:
     path: /api-docs
@@ -29,6 +39,8 @@ logging:
     root: INFO
     net.ayman.supplychainx: DEBUG
     org.springframework: INFO
+    org.springframework.security: DEBUG
+    net.ayman.supplychainx.common.security: DEBUG
 
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

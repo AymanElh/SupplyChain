@@ -10,7 +10,7 @@
     <!-- Logstash Appender for sending logs to Logstash-->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <!-- Logstash host and port -->
-        <destination>logstash:5000</destination>
+        <destination>localhost:5000</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
