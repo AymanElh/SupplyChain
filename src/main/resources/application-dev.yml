@@ -10,12 +10,6 @@ spring:
       ddl-auto: update
     show-sql: true
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8081/realms/supplychain
-          jwk-set-uri: http://localhost:8081/realms/supplychain/protocol/openid-connect/certs
 
   main:
     allow-bean-definition-overriding: true
@@ -47,6 +41,6 @@ logging:
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
   file:
-    name: logs/supplychainx.log
+    name: app/logs/supplychainx.log
     max-size: 10MB
     max-history: 30

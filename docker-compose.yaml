@@ -11,16 +11,18 @@ services:
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - JWT_SECRET=mySecretKey123456789012345678901234567890123456789012345
+      - KEYCLOAK_ISSUER_URI=http://localhost:8081/realms/supplychain
+      - KEYCLOAK_JWK_SET_URI=http://keycloak:8080/realms/supplychain/protocol/openid-connect/certs
     ports:
       - "8080:8080"
-    volumes:
-      - app-logs:/app/logs
     networks:
       - app-network
       - elk-network
     depends_on:
       db:
         condition: service_healthy
+      keycloak:
+        condition: service_started
     restart: unless-stopped
 
   db:
@@ -31,7 +33,7 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: supply_db
     volumes:
-      - db:/data/postgres
+      - db:/var/lib/postgresql
     ports:
       - "5432:5432"
     networks:
@@ -116,8 +118,7 @@ services:
     container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - "5601:5601"
+    ports: []
     networks:
       - app-network
     restart: unless-stopped
@@ -142,8 +143,6 @@ services:
     image: keycloak/keycloak:21.1.1
     container_name: keycloak
     command: start-dev
-    depends_on:
-      - keycloak-db
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -153,6 +152,9 @@ services:
       KC_DB_PASSWORD: keycloak
     ports:
       - "8081:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
     networks:
       - app-network
     restart: unless-stopped
@@ -166,8 +168,12 @@ services:
       POSTGRES_PASSWORD: keycloak
     volumes:
       - keycloak_data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
+    ports: []
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - app-network
 

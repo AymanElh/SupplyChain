@@ -28,7 +28,7 @@ public class SupplierController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<SupplierResponseDTO>> getAllSuppliers(
             int page,
             int size,

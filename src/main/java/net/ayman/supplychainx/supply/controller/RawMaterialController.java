@@ -1,6 +1,7 @@
 package net.ayman.supplychainx.supply.controller;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialRequest;
 import net.ayman.supplychainx.supply.dto.rawmaterial.RawMaterialResponse;
 import net.ayman.supplychainx.supply.service.RawMaterialService;
@@ -10,9 +11,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/materials")
 public class RawMaterialController {
@@ -21,6 +24,11 @@ public class RawMaterialController {
 
     public RawMaterialController(RawMaterialService rawMaterialService) {
         this.rawMaterialService = rawMaterialService;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Authentication> me(Authentication auth) {
+        return ResponseEntity.ok(auth);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
