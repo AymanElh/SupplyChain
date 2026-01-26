@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -54,10 +56,27 @@ public class BillOfMaterialServiceImp implements BillOfMaterialService {
 
     @Override
     public List<BillOfMaterialResponseDTO> getProductBill(Long productId) {
-        return billOfMaterialRepository.findByProductId(productId)
+        List<BillOfMaterial> bills = billOfMaterialRepository.findByProductId(productId);
+
+        Set<Long> materialIds = bills.stream()
+                .map(BillOfMaterial::getMaterialId)
+                .collect(java.util.stream.Collectors.toSet());
+
+        Map<Long, RawMaterialResponse> materialsMap = supplyFacade.getMaterialsByIds(materialIds)
                 .stream()
-                .map(billOfMaterialMapper::toResponseDTO)
-                .toList();
+                .collect(java.util.stream.Collectors.toMap(RawMaterialResponse::getId, material -> material));
+
+        return bills.stream()
+                .map(bill -> {
+                    BillOfMaterialResponseDTO dto = billOfMaterialMapper.toResponseDTO(bill);
+                    RawMaterialResponse material = materialsMap.get(bill.getMaterialId());
+                    if (material != null) {
+                        dto.setMaterialName(material.getName());
+                        dto.setMaterialUnit(material.getUnit());
+                    }
+                    return dto;
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 
     @Override

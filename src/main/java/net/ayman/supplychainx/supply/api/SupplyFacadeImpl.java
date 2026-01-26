@@ -8,6 +8,10 @@ import net.ayman.supplychainx.supply.model.RawMaterial;
 import net.ayman.supplychainx.supply.repository.RawMaterialRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Component
 @RequiredArgsConstructor
 public class SupplyFacadeImpl implements SupplyFacade{
@@ -20,6 +24,14 @@ public class SupplyFacadeImpl implements SupplyFacade{
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Raw material with id %d not found", materialId)));
 
         return rawMaterialMapper.toResponseDTO(material);
+    }
+
+    @Override
+    public List<RawMaterialResponse> getMaterialsByIds(Set<Long> materialIds) {
+        List<RawMaterial> materials = rawMaterialRepository.findAllById(materialIds);
+        return materials.stream()
+                .map(rawMaterialMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
