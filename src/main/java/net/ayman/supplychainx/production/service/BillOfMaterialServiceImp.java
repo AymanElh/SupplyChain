@@ -45,6 +45,8 @@ public class BillOfMaterialServiceImp implements BillOfMaterialService {
         bom.setQuantity(bomDTO.getQuantity());
         bom.setPriceAtOrder(new BigDecimal(material.getUnitCost()));
 
+        log.debug("Bill of material: {}", bom);
+
         log.info("Mapping bom from dto to entity: {} to {}", bomDTO, bom);
         BillOfMaterial savedBom = billOfMaterialRepository.save(bom);
         return billOfMaterialMapper.toResponseDTO(savedBom);

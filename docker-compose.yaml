@@ -104,6 +104,11 @@ services:
       memlock:
         soft: -1
         hard: -1
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - es_data:/usr/share/elasticsearch/data
     ports:
@@ -118,7 +123,8 @@ services:
     container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports: []
+    ports:
+      - "5601:5601"
     networks:
       - app-network
     restart: unless-stopped

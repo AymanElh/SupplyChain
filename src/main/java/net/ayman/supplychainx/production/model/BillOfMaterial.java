@@ -30,7 +30,7 @@ public class BillOfMaterial {
     private Long materialId;
 
     // snapshot of the price of raw material on the bill of material order
-    @Column(name = "material_price", precision = 10, scale = 10)
+    @Column(name = "material_price", precision = 10, scale = 2)
     private BigDecimal priceAtOrder;
 
     @Column(name = "is_deleted")
