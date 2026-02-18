@@ -10,7 +10,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - JWT_SECRET=mySecretKey123456789012345678901234567890123456789012345
+      - JWT_SECRET=mySecretKey12345678901234567   8901234567890123456789012345
       - KEYCLOAK_ISSUER_URI=http://localhost:8081/realms/supplychain
       - KEYCLOAK_JWK_SET_URI=http://keycloak:8080/realms/supplychain/protocol/openid-connect/certs
     ports:

@@ -16,5 +16,6 @@ public class ProductResponseDTO {
     private Double cost;
     private BigDecimal materialCost; // I will handle it after
     private BigDecimal profitMargin; // I will handle it after
+    private Integer stock;
     private Boolean hasBom;
 }

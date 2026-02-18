@@ -13,6 +13,7 @@ public interface CustomerOrderService {
     CustomerOrderResponseDTO getOrderById(Long id);
     void deleteOrder(Long id);
     Page<CustomerOrderResponseDTO> getAllOrders(Pageable pageable);
+    Page<CustomerOrderResponseDTO> getAllOrdersByStatus(OrderStatus status, Pageable pageable);
     List<CustomerOrderResponseDTO> getOrdersByCustomerId(Long customerId);
     CustomerOrderResponseDTO updateStatus(Long orderId, OrderStatus status);
     CustomerOrderResponseDTO updateQuantity(Long orderId, Long quantity);

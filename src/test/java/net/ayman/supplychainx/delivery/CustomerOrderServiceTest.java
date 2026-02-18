@@ -140,7 +140,7 @@ class CustomerOrderServiceTest {
         void shouldCreateOrder() {
             net.ayman.supplychainx.production.dto.product.ProductResponseDTO productDTO = 
                 new net.ayman.supplychainx.production.dto.product.ProductResponseDTO(
-                    PRODUCT_ID, "Gaming Laptop", 8, 100.0, null, null, true);
+                    PRODUCT_ID, "Gaming Laptop", 8, 100.0, null, null, null, true);
             
             when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
             when(addressRepository.findById(ADDRESS_ID)).thenReturn(Optional.of(address));
@@ -246,7 +246,7 @@ class CustomerOrderServiceTest {
         void shouldThrowExceptionWhenInsufficientStock() {
             net.ayman.supplychainx.production.dto.product.ProductResponseDTO productDTO = 
                 new net.ayman.supplychainx.production.dto.product.ProductResponseDTO(
-                    PRODUCT_ID, "Gaming Laptop", 8, 100.0, null, null, true);
+                    PRODUCT_ID, "Gaming Laptop", 8, 100.0, null, null, null, true);
 
             when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
             when(addressRepository.findById(ADDRESS_ID)).thenReturn(Optional.of(address));
@@ -265,7 +265,7 @@ class CustomerOrderServiceTest {
         void shouldReduceProductStockWhenCreatingOrder() {
             net.ayman.supplychainx.production.dto.product.ProductResponseDTO productDTO = 
                 new net.ayman.supplychainx.production.dto.product.ProductResponseDTO(
-                    PRODUCT_ID, "Gaming Laptop", 8, 100.0, null, null, true);
+                    PRODUCT_ID, "Gaming Laptop", 8, 100.0, null, null, null, true);
 
             when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
             when(addressRepository.findById(ADDRESS_ID)).thenReturn(Optional.of(address));
@@ -320,6 +320,7 @@ class CustomerOrderServiceTest {
             when(customerOrderRepository.findAll(pageable)).thenReturn(orderPage);
             when(customerOrderMapper.toResponseDTO(any(CustomerOrder.class))).thenReturn(responseDTO);
 
+            OrderStatus status = OrderStatus.PENDING;
             Page<CustomerOrderResponseDTO> result = customerOrderService.getAllOrders(pageable);
 
             assertThat(result).isNotNull();

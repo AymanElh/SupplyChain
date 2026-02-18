@@ -32,7 +32,7 @@ public class CustomerOrderController {
     // US35: Create customer order - GESTIONNAIRE_COMMERCIAL
     @PreAuthorize("hasRole('GESTIONNAIRE_COMMERCIAL')")
     @PostMapping
-    public ResponseEntity<CustomerOrderResponseDTO> createOrder(@Valid @RequestBody CustomerOrderRequestDTO dto, BindingResult bindingResult) {
+    public ResponseEntity<CustomerOrderResponseDTO> createOrder(@Valid @RequestBody CustomerOrderRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(customerOrderService.createOrder(dto));
     }
 
@@ -43,9 +43,6 @@ public class CustomerOrderController {
         return ResponseEntity.ok(customerOrderService.updateStatus(orderId, dto.status()));
     }
 
-    // US38: View all customer orders - SUPERVISEUR_LIVRAISONS
-    @PreAuthorize("hasRole('SUPERVISEUR_LIVRAISONS')")
-    @GetMapping
     public ResponseEntity<Page<CustomerOrderResponseDTO>> getAllOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -53,6 +50,19 @@ public class CustomerOrderController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         return ResponseEntity.ok(customerOrderService.getAllOrders(pageable));
+    }
+
+    // US38: View all customer orders - SUPERVISEUR_LIVRAISONS
+    @PreAuthorize("hasRole('SUPERVISEUR_LIVRAISONS')")
+    @GetMapping
+    public ResponseEntity<Page<CustomerOrderResponseDTO>> getAllOrdersByStatus(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "PENDING") OrderStatus status
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return ResponseEntity.ok(customerOrderService.getAllOrdersByStatus(status, pageable));
     }
 
 

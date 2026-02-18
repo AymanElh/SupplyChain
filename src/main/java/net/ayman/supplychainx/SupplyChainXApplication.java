@@ -10,11 +10,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SpringBootApplication
 public class SupplyChainXApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SupplyChainXApplication.class, args);
+        List l = new ArrayList();
+        l.add(2, "sds");
+        l.add(2);
+        System.out.println(l);
     }
 
     @Bean

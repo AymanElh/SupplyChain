@@ -159,6 +159,11 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
     }
 
     @Override
+    public Page<CustomerOrderResponseDTO> getAllOrdersByStatus(OrderStatus status, Pageable pageable) {
+        return customerOrderRepository.findAllByStatus(status, pageable).map(customerOrderMapper::toResponseDTO);
+    }
+
+    @Override
     public List<CustomerOrderResponseDTO> getOrdersByCustomerId(Long customerId) {
         if(!customerOrderRepository.existsById(customerId)) {
             throw new ResourceNotFoundException("Customer with id " + customerId + " not found");

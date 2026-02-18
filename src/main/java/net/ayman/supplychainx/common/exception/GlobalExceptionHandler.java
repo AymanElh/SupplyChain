@@ -10,8 +10,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -195,5 +197,38 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request
+    ) {
+        Class<?> required = ex.getRequiredType();
+        if (required != null && required.isEnum()) {
+            String allowed = Arrays.stream(required.getEnumConstants())
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
+            String msg = String.format("Invalid value '%s' for parameter '%s'. Allowed values: %s",
+                    ex.getValue(), ex.getName(), allowed);
+
+            ApiError apiError = new ApiError(
+                    LocalDateTime.now(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Invalid Parameter",
+                    msg,
+                    request.getRequestURI()
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+        }
+
+        ApiError apiError = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid Parameter Type",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
     }
 }

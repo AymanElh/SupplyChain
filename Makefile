@@ -8,6 +8,9 @@ help:
 	@echo "  make up    - Start application with Docker Compose"
 	@echo "  make cleardown  - Stop Docker containers"
 	@echo "  make db-container - Getting inside database container"
+	@echo "  make app-db       - Start app and database containers"
+	@echo "  make elk-stack    - Start ELK Stack containers (elasticsearch, logstash and kibana)"
+	@echo "  make keycloak     - Start keycloak containers"
 	@echo "  make clean        - Clean build artifacts"
 
 build:
@@ -49,6 +52,18 @@ app-container:
 db-container:
 	@echo "Getting inside database container ..."
 	docker exec -it supply_postgres bash
+
+app-db:
+	@echo "Starting app and db containers ..."
+	docker compose up app db -d
+
+elk-stack:
+	@echo "Start ELK stack containers ..."
+	docker compose up elasticsearch logstash kibana -d
+
+keycloak:
+	@echo  "Start keycloak containers"
+	docker compose up keycloak keycloak-db -d
 
 down:
 	@echo "Stopping Docker containers..."

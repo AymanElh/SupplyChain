@@ -1,0 +1,709 @@
+@startuml SmartFit_Class_Diagram
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+' =====================================================
+' LÉGENDE DES COULEURS PAR SERVICE
+' =====================================================
+skinparam class {
+    BackgroundColor<<UserService>> LightBlue
+    BackgroundColor<<WorkoutService>> LightGreen
+    BackgroundColor<<NutritionService>> LightYellow
+    BackgroundColor<<ProgressService>> LightPink
+    BackgroundColor<<AIService>> LightCoral
+    BackgroundColor<<Keycloak>> LightGray
+    BorderColor Black
+}
+
+' =====================================================
+' PACKAGE: KEYCLOAK (Identity Management)
+' =====================================================
+package "Keycloak - PostgreSQL :5432" <<Keycloak>> {
+
+    class User <<Keycloak>> {
+        + id: UUID
+        + username: String
+        + email: String
+        + emailVerified: Boolean
+        + enabled: Boolean
+        + createdTimestamp: Long
+        --
+        Géré par Keycloak
+    }
+
+    class Role <<Keycloak>> {
+        + id: UUID
+        + name: String
+        + description: String
+        --
+        USER, ADMIN, COACH
+    }
+
+    class Credential <<Keycloak>> {
+        + id: UUID
+        + userId: UUID
+        + type: String
+        + value: String
+        + salt: String
+        --
+        Passwords, OTP
+    }
+
+    User "1" -- "*" Role : has
+    User "1" -- "*" Credential : has
+}
+
+' =====================================================
+' PACKAGE: USER SERVICE - PostgreSQL :5433
+' =====================================================
+package "User Service - PostgreSQL :5433" <<UserService>> {
+
+    class UserProfile <<UserService>> {
+        + userId: Long {PK}
+        + firstName: String
+        + lastName: String
+        + dateOfBirth: LocalDate
+        + gender: Gender
+        + height: Double
+        + currentWeight: Double
+        + activityLevel: ActivityLevel
+        + fitnessLevel: FitnessLevel
+        + trainingMonths: Integer
+        + createdAt: LocalDateTime
+        + updatedAt: LocalDateTime
+        --
+        + getAge(): Integer
+        + getBMI(): Double
+        + getTDEE(): Integer
+    }
+
+    enum Gender <<UserService>> {
+        MALE
+        FEMALE
+        OTHER
+    }
+
+    enum ActivityLevel <<UserService>> {
+        SEDENTARY
+        LIGHTLY_ACTIVE
+        MODERATELY_ACTIVE
+        VERY_ACTIVE
+        EXTREMELY_ACTIVE
+    }
+
+    enum FitnessLevel <<UserService>> {
+        BEGINNER
+        INTERMEDIATE
+        ADVANCED
+    }
+
+    class FitnessGoal <<UserService>> {
+        + id: Long {PK}
+        + userId: Long {FK}
+        + goalType: GoalType
+        + targetWeight: Double
+        + targetDate: LocalDate
+        + daysPerWeek: Integer
+        + sessionDuration: Integer
+        + availableEquipment: List<String>
+        + isActive: Boolean
+        + createdAt: LocalDateTime
+    }
+
+    enum GoalType <<UserService>> {
+        WEIGHT_LOSS
+        MUSCLE_GAIN
+        MAINTENANCE
+        STRENGTH
+        ENDURANCE
+        FLEXIBILITY
+    }
+
+    class DietaryPreference <<UserService>> {
+        + id: Long {PK}
+        + userId: Long {FK}
+        + restrictions: List<String>
+        + allergies: List<String>
+        + dislikedFoods: List<String>
+        + preferredCuisines: List<String>
+        + mealBudget: String
+    }
+
+    class UserSettings <<UserService>> {
+        + userId: Long {PK}
+        + notificationsEnabled: Boolean
+        + workoutReminders: Boolean
+        + mealReminders: Boolean
+        + weeklyReports: Boolean
+        + language: String
+        + timezone: String
+        + measurementSystem: MeasurementSystem
+    }
+
+    enum MeasurementSystem <<UserService>> {
+        METRIC
+        IMPERIAL
+    }
+
+    UserProfile "1" -- "1" Gender
+    UserProfile "1" -- "1" ActivityLevel
+    UserProfile "1" -- "1" FitnessLevel
+    UserProfile "1" -- "*" FitnessGoal : has
+    UserProfile "1" -- "0..1" DietaryPreference : has
+    UserProfile "1" -- "0..1" UserSettings : has
+    FitnessGoal "1" -- "1" GoalType
+}
+
+' =====================================================
+' PACKAGE: WORKOUT SERVICE - MongoDB :27017
+' =====================================================
+package "Workout Service - MongoDB :27017" <<WorkoutService>> {
+
+    class Exercise <<WorkoutService>> {
+        + _id: ObjectId {PK}
+        + name: String
+        + description: String
+        + category: ExerciseCategory
+        + difficulty: DifficultyLevel
+        + primaryMuscle: MuscleGroup
+        + secondaryMuscles: List<MuscleGroup>
+        + equipment: EquipmentType
+        + videoUrl: String
+        + instructionSteps: List<String>
+        + caloriesPerMinute: Integer
+        + isActive: Boolean
+        + createdAt: Date
+    }
+
+    enum ExerciseCategory <<WorkoutService>> {
+        CARDIO
+        STRENGTH
+        FLEXIBILITY
+        BALANCE
+        SPORTS
+    }
+
+    enum DifficultyLevel <<WorkoutService>> {
+        BEGINNER
+        INTERMEDIATE
+        ADVANCED
+    }
+
+    enum MuscleGroup <<WorkoutService>> {
+        CHEST
+        BACK
+        SHOULDERS
+        BICEPS
+        TRICEPS
+        FOREARMS
+        ABS
+        OBLIQUES
+        QUADS
+        HAMSTRINGS
+        CALVES
+        GLUTES
+    }
+
+    enum EquipmentType <<WorkoutService>> {
+        NONE
+        DUMBBELLS
+        BARBELL
+        RESISTANCE_BANDS
+        MACHINES
+        KETTLEBELL
+        CABLE
+        BODYWEIGHT
+    }
+
+    class WorkoutPlan <<WorkoutService>> {
+        + _id: ObjectId {PK}
+        + userId: Long
+        + name: String
+        + description: String
+        + startDate: Date
+        + endDate: Date
+        + daysPerWeek: Integer
+        + durationWeeks: Integer
+        + targetGoal: String
+        + isAIGenerated: Boolean
+        + isActive: Boolean
+        + createdAt: Date
+        + workoutDays: List<WorkoutDay>
+        --
+        + getTotalDuration(): Integer
+        + getCompletionRate(): Double
+    }
+
+    class WorkoutDay <<WorkoutService>> {
+        + dayOfWeek: String
+        + weekNumber: Integer
+        + focusArea: String
+        + estimatedDuration: Integer
+        + exercises: List<WorkoutExercise>
+        --
+        + getEstimatedCalories(): Integer
+    }
+
+    class WorkoutExercise <<WorkoutService>> {
+        + exerciseId: ObjectId
+        + exerciseName: String
+        + sets: Integer
+        + reps: String
+        + durationMinutes: Integer
+        + weightKg: Double
+        + restSeconds: Integer
+        + orderIndex: Integer
+        + notes: String
+    }
+
+    class WorkoutLog <<WorkoutService>> {
+        + _id: ObjectId {PK}
+        + userId: Long
+        + workoutDayId: ObjectId
+        + completedAt: Date
+        + actualDuration: Integer
+        + caloriesBurned: Integer
+        + difficultyRating: Double
+        + notes: String
+        + exerciseLogs: List<ExerciseLog>
+    }
+
+    class ExerciseLog <<WorkoutService>> {
+        + exerciseId: ObjectId
+        + exerciseName: String
+        + completedSets: Integer
+        + completedReps: Integer
+        + weightUsed: Double
+        + completed: Boolean
+        + notes: String
+    }
+
+    Exercise "1" -- "1" ExerciseCategory
+    Exercise "1" -- "1" DifficultyLevel
+    Exercise "1" -- "1" MuscleGroup : primaryMuscle
+    Exercise "1" -- "*" MuscleGroup : secondaryMuscles
+    Exercise "1" -- "1" EquipmentType
+
+    WorkoutPlan "1" *-- "*" WorkoutDay : contains
+    WorkoutDay "1" *-- "*" WorkoutExercise : contains
+    WorkoutLog "1" *-- "*" ExerciseLog : contains
+}
+
+' =====================================================
+' PACKAGE: NUTRITION SERVICE - PostgreSQL :5434
+' =====================================================
+package "Nutrition Service - PostgreSQL :5434" <<NutritionService>> {
+
+    class Food <<NutritionService>> {
+        + id: Long {PK}
+        + name: String
+        + brand: String
+        + category: FoodCategory
+        + servingSize: Double
+        + servingUnit: String
+        + calories: Double
+        + protein: Double
+        + carbs: Double
+        + fats: Double
+        + fiber: Double
+        + sugar: Double
+        + barcode: String
+        + isVerified: Boolean
+        + isCustom: Boolean
+        + createdByUserId: Long
+        + createdAt: LocalDateTime
+    }
+
+    enum FoodCategory <<NutritionService>> {
+        PROTEIN
+        VEGETABLES
+        FRUITS
+        GRAINS
+        DAIRY
+        FATS
+        SNACKS
+        BEVERAGES
+    }
+
+    class Recipe <<NutritionService>> {
+        + id: Long {PK}
+        + userId: Long
+        + name: String
+        + description: String
+        + servings: Integer
+        + prepTimeMinutes: Integer
+        + cookTimeMinutes: Integer
+        + ingredientsJson: String
+        + instructionsJson: String
+        + totalCalories: Double
+        + totalProtein: Double
+        + totalCarbs: Double
+        + totalFats: Double
+        + isPublic: Boolean
+        + createdAt: LocalDateTime
+    }
+
+    class NutritionPlan <<NutritionService>> {
+        + id: Long {PK}
+        + userId: Long {FK}
+        + name: String
+        + startDate: LocalDate
+        + endDate: LocalDate
+        + targetCalories: Integer
+        + targetProtein: Integer
+        + targetCarbs: Integer
+        + targetFats: Integer
+        + isActive: Boolean
+        + createdAt: LocalDateTime
+    }
+
+    class Meal <<NutritionService>> {
+        + id: Long {PK}
+        + nutritionPlanId: Long {FK}
+        + name: String
+        + mealType: MealType
+        + scheduledTime: LocalTime
+    }
+
+    enum MealType <<NutritionService>> {
+        BREAKFAST
+        MORNING_SNACK
+        LUNCH
+        AFTERNOON_SNACK
+        DINNER
+        EVENING_SNACK
+    }
+
+    class MealFood <<NutritionService>> {
+        + id: Long {PK}
+        + mealId: Long {FK}
+        + foodId: Long {FK}
+        + quantity: Double
+        + unit: String
+    }
+
+    class NutritionLog <<NutritionService>> {
+        + id: Long {PK}
+        + userId: Long {FK}
+        + logDate: LocalDate
+        + mealType: MealType
+        + notes: String
+        + createdAt: LocalDateTime
+        --
+        + getTotalCalories(): Double
+        + getTotalMacros(): Map
+    }
+
+    class LoggedFood <<NutritionService>> {
+        + id: Long {PK}
+        + nutritionLogId: Long {FK}
+        + foodId: Long {FK}
+        + quantity: Double
+        + unit: String
+    }
+
+    Food "1" -- "1" FoodCategory
+
+    NutritionPlan "1" -- "*" Meal : contains
+    Meal "1" -- "1" MealType
+    Meal "1" -- "*" MealFood : contains
+    MealFood "*" -- "1" Food : references
+
+    NutritionLog "1" -- "1" MealType
+    NutritionLog "1" -- "*" LoggedFood : contains
+    LoggedFood "*" -- "1" Food : references
+}
+
+' =====================================================
+' PACKAGE: PROGRESS SERVICE - PostgreSQL :5435
+' =====================================================
+package "Progress Service - PostgreSQL :5435" <<ProgressService>> {
+
+    class ProgressRecord <<ProgressService>> {
+        + id: Long {PK}
+        + userId: Long {FK}
+        + recordDate: LocalDate
+        + weight: Double
+        + bodyFatPercentage: Double
+        + notes: String
+        + createdAt: LocalDateTime
+        --
+        + getWeightChange(): Double
+    }
+
+    class BodyMeasurement <<ProgressService>> {
+        + id: Long {PK}
+        + userId: Long {FK}
+        + measurementDate: LocalDate
+        + waistCircumference: Double
+        + chestCircumference: Double
+        + armCircumference: Double
+        + thighCircumference: Double
+        + hipCircumference: Double
+        + neckCircumference: Double
+        + createdAt: LocalDateTime
+    }
+
+    class ProgressPhoto <<ProgressService>> {
+        + id: Long {PK}
+        + userId: Long {FK}
+        + photoDate: LocalDate
+        + photoUrl: String
+        + photoType: PhotoType
+        + notes: String
+        + createdAt: LocalDateTime
+    }
+
+    enum PhotoType <<ProgressService>> {
+        FRONT
+        SIDE
+        BACK
+    }
+
+    class Achievement <<ProgressService>> {
+        + id: Long {PK}
+        + userId: Long {FK}
+        + achievementType: AchievementType
+        + achievedAt: LocalDateTime
+        + description: String
+        + badgeUrl: String
+    }
+
+    enum AchievementType <<ProgressService>> {
+        FIRST_WORKOUT
+        WEEK_STREAK
+        MONTH_STREAK
+        WEIGHT_MILESTONE
+        VOLUME_MILESTONE
+        CONSISTENCY_BADGE
+    }
+
+    ProgressPhoto "1" -- "1" PhotoType
+    Achievement "1" -- "1" AchievementType
+}
+
+' =====================================================
+' PACKAGE: AI SERVICE - MongoDB :27018
+' =====================================================
+package "AI Service - MongoDB :27018" <<AIService>> {
+
+    class AIRecommendation <<AIService>> {
+        + _id: ObjectId {PK}
+        + userId: Long
+        + recommendationType: RecommendationType
+        + contentJson: Object
+        + reasoning: String
+        + generatedAt: Date
+        + isApplied: Boolean
+        + appliedAt: Date
+        + userRating: Integer
+        + userFeedback: String
+    }
+
+    enum RecommendationType <<AIService>> {
+        WORKOUT_PLAN
+        MEAL_PLAN
+        EXERCISE_SUGGESTION
+        NUTRITION_TIP
+        PROGRESS_INSIGHT
+        PLATEAU_ANALYSIS
+    }
+
+    class PromptHistory <<AIService>> {
+        + _id: ObjectId {PK}
+        + userId: Long
+        + promptSent: String
+        + responseReceived: String
+        + tokensUsed: Integer
+        + responseTimeMs: Integer
+        + model: String
+        + createdAt: Date
+    }
+
+    class UserFeedback <<AIService>> {
+        + _id: ObjectId {PK}
+        + recommendationId: ObjectId
+        + userId: Long
+        + rating: Integer
+        + comment: String
+        + wasHelpful: Boolean
+        + createdAt: Date
+    }
+
+    class AnalysisResult <<AIService>> {
+        + _id: ObjectId {PK}
+        + userId: Long
+        + analysisType: String
+        + analysisDate: Date
+        + findings: Object
+        + recommendations: List<Object>
+    }
+
+    AIRecommendation "1" -- "1" RecommendationType
+    AIRecommendation "1" -- "*" UserFeedback : receives
+}
+
+' =====================================================
+' PACKAGE: NOTIFICATION SERVICE - MongoDB :27019
+' =====================================================
+package "Notification Service - MongoDB :27019" {
+
+    class NotificationLog {
+        + _id: ObjectId {PK}
+        + userId: Long
+        + notificationType: NotificationType
+        + recipient: String
+        + subject: String
+        + body: String
+        + status: NotificationStatus
+        + sentAt: Date
+        + metadata: Object
+    }
+
+    enum NotificationType {
+        WELCOME_EMAIL
+        PASSWORD_RESET
+        WORKOUT_REMINDER
+        ACHIEVEMENT_UNLOCKED
+        WEEKLY_SUMMARY
+        PLATEAU_ALERT
+    }
+
+    enum NotificationStatus {
+        PENDING
+        SENT
+        FAILED
+        DELIVERED
+    }
+
+    class EmailTemplate {
+        + _id: ObjectId {PK}
+        + templateName: String
+        + subject: String
+        + htmlBody: String
+        + textBody: String
+        + variables: List<String>
+        + isActive: Boolean
+    }
+
+    class NotificationQueue {
+        + _id: ObjectId {PK}
+        + userId: Long
+        + notificationType: NotificationType
+        + scheduledFor: Date
+        + priority: Integer
+        + payload: Object
+        + status: String
+        + retryCount: Integer
+        + maxRetries: Integer
+    }
+
+    NotificationLog "1" -- "1" NotificationType
+    NotificationLog "1" -- "1" NotificationStatus
+    NotificationQueue "1" -- "1" NotificationType
+}
+
+' =====================================================
+' PACKAGE: SHARED EVENTS (RabbitMQ)
+' =====================================================
+package "Shared Events - RabbitMQ" {
+
+    class UserCreatedEvent {
+        + userId: Long
+        + email: String
+        + timestamp: LocalDateTime
+    }
+
+    class ProfileUpdatedEvent {
+        + userId: Long
+        + changes: Map
+        + timestamp: LocalDateTime
+    }
+
+    class GoalChangedEvent {
+        + userId: Long
+        + oldGoal: GoalType
+        + newGoal: GoalType
+        + timestamp: LocalDateTime
+    }
+
+    class WorkoutCompletedEvent {
+        + userId: Long
+        + workoutId: String
+        + completedAt: LocalDateTime
+        + caloriesBurned: Integer
+        + duration: Integer
+    }
+
+    class MealLoggedEvent {
+        + userId: Long
+        + logDate: LocalDate
+        + mealType: MealType
+        + totalCalories: Double
+        + timestamp: LocalDateTime
+    }
+
+    class WeightUpdatedEvent {
+        + userId: Long
+        + newWeight: Double
+        + previousWeight: Double
+        + recordDate: LocalDate
+        + timestamp: LocalDateTime
+    }
+
+    class PlateauDetectedEvent {
+        + userId: Long
+        + plateauWeeks: Integer
+        + rootCause: String
+        + recommendations: List<String>
+        + timestamp: LocalDateTime
+    }
+
+    class AchievementUnlockedEvent {
+        + userId: Long
+        + achievementType: AchievementType
+        + achievedAt: LocalDateTime
+    }
+}
+
+' =====================================================
+' RELATIONS CROSS-SERVICES (via userId)
+' =====================================================
+note right of User
+  userId dans Keycloak
+  est référencé dans tous
+  les autres services
+end note
+
+UserProfile ..> User : userId references
+FitnessGoal ..> UserProfile : userId
+WorkoutPlan ..> User : userId
+NutritionPlan ..> User : userId
+ProgressRecord ..> User : userId
+AIRecommendation ..> User : userId
+NotificationLog ..> User : userId
+
+' =====================================================
+' EVENT PUBLISHERS & CONSUMERS
+' =====================================================
+UserProfile ..> ProfileUpdatedEvent : publishes
+FitnessGoal ..> GoalChangedEvent : publishes
+WorkoutLog ..> WorkoutCompletedEvent : publishes
+NutritionLog ..> MealLoggedEvent : publishes
+ProgressRecord ..> WeightUpdatedEvent : publishes
+Achievement ..> AchievementUnlockedEvent : publishes
+AnalysisResult ..> PlateauDetectedEvent : publishes
+
+AIRecommendation ..> WorkoutCompletedEvent : consumes
+AIRecommendation ..> WeightUpdatedEvent : consumes
+AIRecommendation ..> GoalChangedEvent : consumes
+
+NotificationLog ..> UserCreatedEvent : consumes
+NotificationLog ..> WorkoutCompletedEvent : consumes
+NotificationLog ..> AchievementUnlockedEvent : consumes
+NotificationLog ..> PlateauDetectedEvent : consumes
+
+@enduml
