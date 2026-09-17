@@ -8,6 +8,13 @@ spring:
       ddl-auto: validate
     show-sql: false
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
+
 springdoc:
   api-docs:
     path: /api-docs

@@ -55,30 +55,29 @@ public class KeycloakSecurityConfig {
         return http.build();
     }
 
+
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-
-        // Don't add ROLE_ prefix
-        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        authoritiesConverter.setAuthorityPrefix(""); // No prefix
-        authoritiesConverter.setAuthoritiesClaimName("realm_access. roles"); // This won't work for nested
-
-        // Use custom converter instead
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+            log.debug("realmAccess: {}", realmAccess);
+
             if (realmAccess == null) return Collections.emptyList();
 
             List<String> roles = (List<String>) realmAccess.get("roles");
             if (roles == null) return Collections.emptyList();
 
+            log.debug("roles: {}", roles);
             return roles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                     .collect(Collectors.toList());
+
         });
 
         return converter;
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
