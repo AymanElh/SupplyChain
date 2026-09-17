@@ -34,9 +34,9 @@ public class SupplierOrderController {
     @PreAuthorize("hasRole('SUPERVISEUR_LOGISTIQUE')")
     @GetMapping
     public ResponseEntity<Page<SupplierOrderResponseDTO>> getAllOrders(
-            int page,
-            int size,
-            String sortBy
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(supplierOrderService.getAll(pageable));

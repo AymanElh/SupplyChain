@@ -34,8 +34,8 @@ public class RawMaterialController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<Page<RawMaterialResponse>> getAllMaterials(
-            int page,
-            int size
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.getAll(pageable));

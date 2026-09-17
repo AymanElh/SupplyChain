@@ -30,9 +30,9 @@ public class SupplierController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<SupplierResponseDTO>> getAllSuppliers(
-            int page,
-            int size,
-            String sortBy
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         return ResponseEntity.ok(supplierService.getAll(pageable));

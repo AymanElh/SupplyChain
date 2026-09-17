@@ -21,19 +21,19 @@ public class RoleController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Role>> getAll() {
         return new ResponseEntity<>(roleService.getAllRoles(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Role> getById(@PathVariable("id") Long id) {
         return new ResponseEntity<>(roleService.findById(id), HttpStatus.OK);
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Role> createRole(@RequestBody Role role) {
         return new ResponseEntity<>(roleService.createRole(role), HttpStatus.CREATED);
     }
