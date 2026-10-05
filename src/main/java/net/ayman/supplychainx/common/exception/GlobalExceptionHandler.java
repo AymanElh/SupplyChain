@@ -126,13 +126,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedException ex, WebRequest request) {
         ApiError apiError = new ApiError(
                 LocalDateTime.now(),
-                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.UNAUTHORIZED.value(),
                 "Unauthorized",
                 ex.getMessage(),
                 request.getDescription(false)
         );
 
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
