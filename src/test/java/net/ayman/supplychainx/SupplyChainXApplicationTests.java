@@ -8,6 +8,6 @@ class SupplyChainXApplicationTests {
 
     @Test
     void contextLoads() {
+        //
     }
-
 }

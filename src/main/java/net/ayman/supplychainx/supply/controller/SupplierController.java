@@ -1,0 +1,71 @@
+package net.ayman.supplychainx.supply.controller;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import net.ayman.supplychainx.supply.dto.supplier.SupplierRequestDTO;
+import net.ayman.supplychainx.supply.dto.supplier.SupplierResponseDTO;
+import net.ayman.supplychainx.supply.service.SupplierService;
+import net.ayman.supplychainx.validation.OnCreate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/suppliers")
+public class SupplierController {
+
+    private final SupplierService supplierService;
+
+    public SupplierController(SupplierService supplierService) {
+        this.supplierService = supplierService;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<SupplierResponseDTO>> getAllSuppliers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return ResponseEntity.ok(supplierService.getAll(pageable));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SupplierResponseDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(supplierService.getSupplierById(id));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESPONSABLE_ACHATS')")
+    @GetMapping("/search")
+    public ResponseEntity<SupplierResponseDTO> searchByName(@RequestParam("name") String name) {
+        return ResponseEntity.status(HttpStatus.OK).body(supplierService.searchByName(name));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
+    @PostMapping
+    public ResponseEntity<SupplierResponseDTO> createSupplier(@Validated(OnCreate.class) @RequestBody SupplierRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(supplierService.createSupplier(dto));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
+    @PutMapping("/{id}")
+    public ResponseEntity<SupplierResponseDTO> updateSupplier(@PathVariable("id") Long id, @Valid @RequestBody SupplierRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(supplierService.updateSupplier(id, dto));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_APPROVISIONNEMENT')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSupplier(@PathVariable("id") Long id) {
+        supplierService.deleteSupplier(id);
+        return ResponseEntity.noContent().build();
+    }
+
+}

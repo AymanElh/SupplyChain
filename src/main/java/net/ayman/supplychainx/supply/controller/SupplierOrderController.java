@@ -1,0 +1,65 @@
+package net.ayman.supplychainx.supply.controller;
+
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import net.ayman.supplychainx.supply.dto.order.SupplierOrderRequestDTO;
+import net.ayman.supplychainx.supply.dto.order.SupplierOrderResponseDTO;
+import net.ayman.supplychainx.supply.model.SupplierOrder;
+import net.ayman.supplychainx.supply.service.SupplierOrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/supplier-orders")
+public class SupplierOrderController {
+
+    private final SupplierOrderService supplierOrderService;
+
+    public SupplierOrderController(SupplierOrderService supplierOrderService) {
+        this.supplierOrderService = supplierOrderService;
+    }
+
+    @PreAuthorize("hasRole('RESPONSABLE_ACHATS')")
+    @PostMapping
+    public ResponseEntity<SupplierOrderResponseDTO> createOrder(@Valid @RequestBody SupplierOrderRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(supplierOrderService.createOrder(dto));
+    }
+
+    @PreAuthorize("hasRole('SUPERVISEUR_LOGISTIQUE')")
+    @GetMapping
+    public ResponseEntity<Page<SupplierOrderResponseDTO>> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(supplierOrderService.getAll(pageable));
+    }
+
+    @PreAuthorize("hasRole('SUPERVISEUR_LOGISTIQUE')")
+    @GetMapping("/{id}")
+    public ResponseEntity<SupplierOrderResponseDTO> getOrderById(@PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(supplierOrderService.getById(id));
+    }
+
+    @PreAuthorize("hasRole('RESPONSABLE_ACHATS')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable("id") Long id) {
+        supplierOrderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('RESPONSABLE_ACHATS')")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<SupplierOrderResponseDTO> updateOrderStatus(@PathVariable("id") Long id, @Valid @RequestBody SupplierOrderRequestDTO dto) {
+        log.info("REST request to update status for order id: {} to {}", id, dto.getStatus());
+        return ResponseEntity.ok(supplierOrderService.updateOrderStatus(id, dto.getStatus()));
+    }
+
+}
