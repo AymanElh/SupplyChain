@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "bill_of_materials")
-@SQLDelete(sql = "UPDATE bill_of_materials SET is_deleted = false, deleted_at = NOW()")
+@SQLDelete(sql = "UPDATE bill_of_materials SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 @Data
 public class BillOfMaterial {

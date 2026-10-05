@@ -60,7 +60,7 @@ class DriverServiceTest {
 
         requestDTO = new DriverRequestDTO(DRIVER_NAME, PHONE, LICENSE_NUMBER, IS_AVAILABLE);
 
-        responseDTO = new DriverResponseDTO(DRIVER_NAME, PHONE, LICENSE_NUMBER, IS_AVAILABLE);
+        responseDTO = new DriverResponseDTO(DRIVER_ID, DRIVER_NAME, PHONE, LICENSE_NUMBER, IS_AVAILABLE);
     }
 
     @Nested
@@ -148,7 +148,7 @@ class DriverServiceTest {
             driver2.setLicenseNumber("DL654321");
             driver2.setIsAvailable(false);
 
-            DriverResponseDTO responseDTO2 = new DriverResponseDTO("Jane Doe", "+0987654321", "DL654321", false);
+            DriverResponseDTO responseDTO2 = new DriverResponseDTO(2L, "Jane Doe", "+0987654321", "DL654321", false);
 
             List<Driver> drivers = Arrays.asList(driver, driver2);
 

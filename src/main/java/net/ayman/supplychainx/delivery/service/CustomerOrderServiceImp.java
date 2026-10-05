@@ -165,7 +165,7 @@ public class CustomerOrderServiceImp implements CustomerOrderService {
 
     @Override
     public List<CustomerOrderResponseDTO> getOrdersByCustomerId(Long customerId) {
-        if(!customerOrderRepository.existsById(customerId)) {
+        if(!customerRepository.existsById(customerId)) {
             throw new ResourceNotFoundException("Customer with id " + customerId + " not found");
         }
 

@@ -334,7 +334,7 @@ class CustomerOrderServiceTest {
         void shouldGetOrdersByCustomerId() {
             List<CustomerOrder> orders = Arrays.asList(order);
 
-            when(customerOrderRepository.existsById(CUSTOMER_ID)).thenReturn(true);
+            when(customerRepository.existsById(CUSTOMER_ID)).thenReturn(true);
             when(customerOrderRepository.findByCustomerId(CUSTOMER_ID)).thenReturn(orders);
             when(customerOrderMapper.toResponseDTO(any(CustomerOrder.class))).thenReturn(responseDTO);
 
@@ -343,7 +343,7 @@ class CustomerOrderServiceTest {
             assertThat(result).isNotNull();
             assertThat(result.size()).isOne();
 
-            verify(customerOrderRepository, times(1)).existsById(CUSTOMER_ID);
+            verify(customerRepository, times(1)).existsById(CUSTOMER_ID);
             verify(customerOrderRepository, times(1)).findByCustomerId(CUSTOMER_ID);
         }
     }
