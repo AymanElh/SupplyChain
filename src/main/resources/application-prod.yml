@@ -49,3 +49,7 @@ management:
     health:
       show-details: when_authorized
       show-components: when_authorized
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:https://app.example.com}

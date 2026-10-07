@@ -17,6 +17,10 @@ ARG APP_VERSION=1.0.0
 
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd -r spring && useradd -r -g spring spring
 
 COPY --from=builder /app/target/SupplyChainX-${APP_VERSION}.jar /app/app.jar
