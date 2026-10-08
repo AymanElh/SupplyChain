@@ -12,7 +12,7 @@ RUN ./mvnw clean package -DskipTests
 # Run Time stage
 FROM eclipse-temurin:21-jre
 
-ARG PROFILE=dev
+ARG PROFILE=prod
 ARG APP_VERSION=1.0.0
 
 WORKDIR /app
